@@ -1,0 +1,37 @@
+#include <iostream>
+#include <cmath>
+using namespace std;
+
+double dist(double x1,double y1,double x2,double y2)
+{
+    return sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2));
+}
+int main()
+{
+    setlocale(LC_ALL,"Russian");
+    double x1,y1,x2,y2,x3,y3;
+    cout << "Введите координату первой точки: ";
+    cin >> x1 >> y1;
+    cout << '\n';
+
+    cout << "Введите координату второй точки: ";
+
+    cin >> x2 >> y2;
+    cout << '\n';
+
+    cout << "Введите координату третьей точки: ";
+
+    cin >> x3 >> y3;
+    cout << '\n';
+
+    double dist1 = dist(x1,y1,x2,y2); // 1 сторона
+    double dist2 = dist(x2,y2,x3,y3); // 2 сторона
+    double dist3 = dist(x1,y1,x3,y3); // 3 сторона
+
+    cout << "1 сторона = " << dist1 << '\n';
+    cout << "2 сторона = " << dist2 << '\n';
+    cout << "3 сторона = " << dist3 << '\n';
+
+
+    cout << "Периметр треугольника = " << dist1 + dist2 + dist3 << '\n';
+}
