@@ -1,0 +1,55 @@
+#include <iostream>
+#include <cmath>
+using namespace std;
+// formul x ^ 2 + y ^ 2 = r ^ 2
+double radiuscircle(double x,double y)
+{
+    return x * x + y * y;
+}
+int main()
+{
+    setlocale(LC_ALL,"Russian");
+
+    double x,y;
+    cout << "Выведите координату точки A(x,y): ";
+    cin >> x >> y;
+    cout << '\n';
+
+    double r0 = 1.0;
+    double r1 = 2.0;
+    double r2 = 3.0;
+    double r3 = 4.0;
+    double r4 = 5.0;
+
+    if (radiuscircle(x,y) <= r0 * r0)
+    {
+        cout << "Не лежит в заштрихованной области";
+        return 0;
+    }
+
+    if (x >= 0 && y <= 0 && radiuscircle(x,y) <= r4 * r4)
+    {
+        cout << "Лежит в заштрихованной области";
+        return 0;
+    }
+
+    if (x >= 0 && y >= 0 && radiuscircle(x,y) <= r1 * r1)
+    {
+        cout << "Лежит в заштрихованной области";
+        return 0;
+    }
+    if (x <= 0 && y <= 0 && radiuscircle(x,y) <= r3 * r3)
+    {
+        cout << "Лежит в заштрихованной области";
+        return 0;
+    }
+    if (x <= 0 && y >= 0 && radiuscircle(x,y) <= r2 * r2)
+    {
+        cout << "Лежит в заштрихованной области";
+        return 0;
+    }
+    cout << "Не лежит в заштрихованной области";
+
+
+
+}
