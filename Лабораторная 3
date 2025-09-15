@@ -10,28 +10,28 @@ int main()
 {
     setlocale(LC_ALL,"Russian");
     double x1,y1,x2,y2,x3,y3;
-    cout << "Введите координату первой точки: ";
+    cout << "Введите координаты вершины A(x1,y1): ";
     cin >> x1 >> y1;
     cout << '\n';
 
-    cout << "Введите координату второй точки: ";
+    cout << "Введите координаты вершины B(x2,y2): ";
 
     cin >> x2 >> y2;
     cout << '\n';
 
-    cout << "Введите координату третьей точки: ";
+    cout << "Введите координаты вершины С(x3,y3): ";
 
     cin >> x3 >> y3;
     cout << '\n';
 
     double dist1 = dist(x1,y1,x2,y2); // 1 сторона
-    double dist2 = dist(x2,y2,x3,y3); // 2 сторона
-    double dist3 = dist(x1,y1,x3,y3); // 3 сторона
+    double dist2 = dist(x1,y1,x3,y3); // 2 сторона
+    double dist3 = dist(x2,y2,x3,y3); // 3 сторона
+   
 
-    cout << "1 сторона = " << dist1 << '\n';
-    cout << "2 сторона = " << dist2 << '\n';
-    cout << "3 сторона = " << dist3 << '\n';
+    cout << "Длина AB=" << dist1 << '\n'
+         << "Длина AC=" << dist2 << '\n'
+         << "Длина CB=" << dist3 << '\n';
 
-
-    cout << "Периметр треугольника = " << dist1 + dist2 + dist3 << '\n';
+    cout << "Периметр треугольника ABC = " << dist1 + dist2 + dist3 << '\n';
 }
