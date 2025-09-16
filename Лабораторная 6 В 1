@@ -1,0 +1,39 @@
+#include <iostream>
+#include <cmath>
+using namespace std;
+
+double fun(double x)
+{
+    if (x >= -1 && x <= 1)
+    {
+        return -1e9;
+    }
+    return 5.6 / (pow(x, 3) + 1) + 0.3 * x - pow(sin(x), 3);
+}
+
+int main()
+{
+    setlocale(LC_ALL, "Russian");
+
+    double x_n = -1e5;
+    double x_k = 1e5;
+    double dx = 0.5;
+
+    cout << "x\tF(x)\n";
+
+    while (x_n <= x_k)
+    {
+        double result = fun(x_n);
+
+        if (result == -1e9)
+        {
+            cout << x_n << "\tФункция не определена\n";
+        }
+        else
+        {
+            cout << x_n << "\t" << result << '\n';
+        }
+
+        x_n += dx;
+    }
+}
