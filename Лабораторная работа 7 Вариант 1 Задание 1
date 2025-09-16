@@ -1,0 +1,25 @@
+#include <iostream>
+#include <cmath>
+using namespace std;
+
+
+int main()
+{
+    setlocale(LC_ALL, "Russian");
+
+    cout << "Выведите число k: ";
+    double k;
+    cin >> k;
+
+
+    double s = 0;
+
+    for (double i = 1; i <= k; i++)
+    {
+        s += (i + k / (i + 2));
+    }
+
+    cout << s << '\n';
+
+
+}
