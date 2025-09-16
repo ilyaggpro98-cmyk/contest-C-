@@ -1,0 +1,35 @@
+#include <iostream>
+#include <string>
+using namespace std;
+
+int main()
+{
+    setlocale(LC_ALL, "Russian");
+    char c;
+
+    cin >> c;
+
+    switch (c)
+    {
+        case 'M':
+          cout << "Minsk\n";
+          break;
+        case 'S':
+          cout << "Slonim\n";
+          break;
+        case 'N':
+          cout << "Novogrudok\n";
+          break;
+        case 'L':
+          cout << "Luninets\n";
+
+        case 'B':
+            cout << "Baranovichi\n";
+            break;
+        default:
+            cout << "ошибка. Буква не из этого набора \n";
+            return 0;
+    }
+
+    return 0;
+}
