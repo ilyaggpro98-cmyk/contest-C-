@@ -1,0 +1,30 @@
+#include <iostream>
+#include <cmath>
+using namespace std;
+int main()
+{
+    setlocale(LC_ALL,"Russian");
+    int n;
+    cin >> n;
+    if (n < 1 || n > 7)
+    {
+        cout << "Неправильный номер дня недели\n";
+        return 0;
+    }
+    string days[7] =
+    {
+        "Понедельник",
+        "Вторник",
+        "Среда",
+        "Четверг",
+        "Пятница",
+        "Суббота",
+        "Воскресенье"
+    };
+
+    int lst = (n - 2 + 7) % 7;
+    cout << "Предыдущий день недели: " << days[lst] << '\n';
+
+
+
+}
