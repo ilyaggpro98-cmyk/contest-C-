@@ -1,0 +1,83 @@
+#include <iostream>
+#include <vector>
+#include <random>
+#include <iomanip>
+#include <limits>
+
+using namespace std;
+
+struct Matrix {
+    string name;
+    vector<vector<double>> a;
+    int m, n;
+};
+
+bool readInRangeInt(const char* prompt, int& x, int lo, int hi) {
+    cout << prompt;
+    cin >> x;
+    if (x < lo || x > hi) {
+        cerr << "Ошибка: значение должно быть целым в диапазоне [" << lo << ", " << hi << "].\n";
+        return false;
+    }
+    return true;
+}
+
+bool readInRangeDouble(const char* prompt, double& x, double lo, double hi) {
+    cout << prompt;
+    cin >> x;
+    if (x < lo || x > hi) {
+        cerr << "Ошибка: значение должно быть вещественным в диапазоне [" << lo << ", " << hi << "].\n";
+        return false;
+    }
+    return true;
+}
+
+Matrix generateMatrix(const string& name, int m, int n, double k,
+                      mt19937& rng, uniform_real_distribution<double>& dist) {
+    Matrix M{name, vector<vector<double>>(m, vector<double>(n)), m, n};
+    for (int i = 0; i < m; ++i)
+        for (int j = 0; j < n; ++j)
+            M.a[i][j] = dist(rng);
+    return M;
+}
+
+void printMatrix(const Matrix& M, int width = 9, int prec = 3) {
+    cout << "Матрица " << M.name << " (" << M.m << "x" << M.n << "):\n";
+    cout << fixed << setprecision(prec);
+    for (int i = 0; i < M.m; ++i) {
+        for (int j = 0; j < M.n; ++j) {
+            cout << setw(width) << M.a[i][j] << " ";
+        }
+        cout << "\n";
+    }
+    cout << "\n";
+}
+
+int main() {
+    setlocale(LC_ALL,"Russian");
+
+    int m, n;
+    double k;
+
+    if (!readInRangeInt("Введите m (2..5): ", m, 2, 5)) return 1;
+    if (!readInRangeInt("Введите n (2..6): ", n, 2, 6)) return 1;
+    if (!readInRangeDouble("Введите k (1.5..4.5): ", k, 1.5, 4.5)) return 1;
+
+
+    random_device rd;
+    mt19937 rng(rd());
+    uniform_real_distribution<double> dist(-k, 2.0 * k);
+
+    Matrix A = generateMatrix("A", m, n, k, rng, dist);
+    Matrix B = generateMatrix("B", m, n, k, rng, dist);
+    Matrix C = generateMatrix("C", m, n, k, rng, dist);
+
+    cout << "\nСгенерированные матрицы со значениями в диапазоне [" << -k << ", " << 2.0 * k << "]:\n\n";
+    printMatrix(A);
+    printMatrix(B);
+    printMatrix(C);
+
+
+
+    return 0;
+}
