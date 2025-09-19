@@ -1,1 +1,42 @@
+#include <bits/stdc++.h>
+using ll = long long;
+using namespace std;
+const ll INF = 1e18;
+int main()
+{
+    setlocale(LC_ALL,"Russian");
+    int n;
 
+    cout << "Введите число n: ";
+    cin >> n;
+    string a[n];
+    getline(cin,a[0]);
+
+    for (int i = 0; i < n; i++)
+    {
+        getline(cin,a[i]);
+    }
+
+    bool f = false;
+    for (int i = 0; i < n; i++)
+    {
+        int nech = 0;
+        for (int j = 0; j < (int) a[i].size() && nech < 2; j++)
+        {
+            if ((a[i][j] - '0') % 2 == 1)
+            {
+                nech++;
+            }
+        }
+        if (nech >= 2)
+        {
+           cout << a[i] << '\n';
+           f = true;
+        }
+    }
+    if (!f)
+    {
+        cout << "Нету таких строк\n";
+    }
+
+}
