@@ -8,6 +8,7 @@ double f(double x)
 }
 int main()
 {
+    setlocale(LC_ALL,"Russian");
     double x;
     cout << "Введите число x: ";
     cin >> x;
