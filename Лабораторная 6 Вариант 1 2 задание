@@ -1,1 +1,27 @@
+#include <bits/stdc++.h>
+using ll = long long;
+using namespace std;
+const ll INF = 1e18;
+double f(double x)
+{
+    return 3.5 - sin(4 * x);
+}
+int main()
+{
+    double x;
+    cout << "Введите число x: ";
+    cin >> x;
 
+    int n = 0;
+    double sum = 0.0;
+    do
+    {
+        n++;
+        sum += (1.0 / n);
+    }while (sum <= f(x));
+
+    cout << n << '\n';
+
+
+
+}
