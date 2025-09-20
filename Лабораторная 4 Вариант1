@@ -21,33 +21,17 @@ int main()
     double r3 = 4.0;
     double r4 = 5.0;
 
-    if (radiuscircle(x,y) <= r0 * r0)
+
+    if (radiuscircle(x,y) >= r0 * r0 &&
+        (x >= 0 && y <= 0 && radiuscircle(x,y) <= r4 * r4)
+        || (x >= 0 && y >= 0 && radiuscircle(x,y) <= r1 * r1)
+        || (x <= 0 && y <= 0 && radiuscircle(x,y) <= r3 * r3)
+        || (x <= 0 && y >= 0 && radiuscircle(x,y) <= r2 * r2))
     {
-        cout << "Не лежит в заштрихованной области";
+        cout << "Лежит в заштрихованной области";
         return 0;
     }
 
-    if (x >= 0 && y <= 0 && radiuscircle(x,y) <= r4 * r4)
-    {
-        cout << "Лежит в заштрихованной области";
-        return 0;
-    }
-
-    if (x >= 0 && y >= 0 && radiuscircle(x,y) <= r1 * r1)
-    {
-        cout << "Лежит в заштрихованной области";
-        return 0;
-    }
-    if (x <= 0 && y <= 0 && radiuscircle(x,y) <= r3 * r3)
-    {
-        cout << "Лежит в заштрихованной области";
-        return 0;
-    }
-    if (x <= 0 && y >= 0 && radiuscircle(x,y) <= r2 * r2)
-    {
-        cout << "Лежит в заштрихованной области";
-        return 0;
-    }
     cout << "Не лежит в заштрихованной области";
 
 
