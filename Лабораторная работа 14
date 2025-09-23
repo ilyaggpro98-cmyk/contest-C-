@@ -37,7 +37,14 @@ Matrix generateMatrix(const string& name, int m, int n, double k,
     Matrix M{name, vector<vector<double>>(m, vector<double>(n)), m, n};
     for (int i = 0; i < m; ++i)
         for (int j = 0; j < n; ++j)
+        {
             M.a[i][j] = dist(rng);
+            while (j % 2 == 0 && M.a[i][j] >= 0)
+            {
+                M.a[i][j] = dist(rng);
+            }
+        }
+
     return M;
 }
 
@@ -45,9 +52,9 @@ void printMatrix(const Matrix& M, int width = 9, int prec = 3) {
     cout << "Матрица " << M.name << " (" << M.m << "x" << M.n << "):\n";
     cout << fixed << setprecision(prec);
     for (int i = 0; i < M.m; ++i) {
-        for (int j = 0; j < M.n; ++j) {
+        for (int j = 0; j < M.n; ++j)
             cout << setw(width) << M.a[i][j] << " ";
-        }
+
         cout << "\n";
     }
     cout << "\n";
