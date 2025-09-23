@@ -1,37 +1,22 @@
 #include <iostream>
 #include <cmath>
 using namespace std;
-int main()
-{
-    setlocale(LC_ALL,"Russian");
 
-    double x,y;
+int main() {
+    setlocale(LC_ALL, "Russian");
+
+    double x, y;
     cout << "Выведите координату точки A(x,y): ";
     cin >> x >> y;
-    cout << '\n';
 
+    const double R = 4.0;
+    const double r = 2.0;
+    double d = fabs(x) + fabs(y);
 
-    double R = 4.0;
-    double r = 2.0;
-
-    double d = abs(x) + abs(y);
-    if (d <= R && d >= r)
-    {
-        if (x > 0 && y < 0)
-        {
-            cout << "Не лежит в заштрихованной области";
-        }
-        else
-        {
-            cout << "Лежит в заштрихованной области";
-        }
-
-    } else {
+    if (d <= R && d >= r && !(x > 0 && y < 0))
+        cout << "Лежит в заштрихованной области";
+    else
         cout << "Не лежит в заштрихованной области";
-    }
 
-
-
-
-
+    return 0;
 }
