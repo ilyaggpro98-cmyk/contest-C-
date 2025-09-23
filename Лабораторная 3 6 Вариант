@@ -1,0 +1,39 @@
+#include <bits/stdc++.h>
+using namespace std;
+int main()
+{
+    setlocale(LC_ALL,"Russian");
+
+    int h,m,s;
+
+    cout << "Выведите числа h , m , s: ";
+
+    cin >> h >> m >> s;
+
+    int p, q, r;
+    cout << '\n';
+    cin >> p >> q >> r;
+
+    cout << "Времени было:\n";
+
+
+    const int DAY = 24 * 3600;
+    int current = h * 3600 + m * 60 + s;
+    int ago   = ((p * 3600 + q * 60 + r) % DAY);
+    int result  = (current - ago + DAY) % DAY;
+
+    int H = result / 3600;
+    int M = (result % 3600) / 60;
+    int S = result % 60;
+
+
+     cout << setfill('0') << setw(2) << H << ':'
+             << setfill('0') << setw(2) << M << ':'
+             << setfill('0') << setw(2) << S << '\n';
+
+
+
+
+
+
+}
