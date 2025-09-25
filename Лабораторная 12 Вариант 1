@@ -1,0 +1,75 @@
+#include <iostream>
+#include <vector>
+#include <random>
+#include <limits>
+using namespace std;
+
+int read_int(const string& prompt, int minv, int maxv) {
+    int x;
+    while (true) {
+        cout << prompt;
+        if (cin >> x && x >= minv && x <= maxv) {
+            return x;
+        }
+        cout << "Неверный ввод. Попробуйте снова.\n";
+        cin.clear();
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+    }
+}
+
+long long productOfEvens(const vector<int>& arr) {
+    long long prod = 1;
+    bool hasEven = false;
+    for (int v : arr) if (v % 2 == 0) { prod *= v; hasEven = true; }
+    return hasEven ? prod : 0;
+}
+
+void answer(vector <int> arr)
+{
+    long long prod = productOfEvens(arr);
+    if (prod == 0)
+    {
+        cout << "Ошибка,нет четных чисел\n";
+        return;
+    }
+    cout << prod << '\n';
+}
+void printArray(const vector<int>& a)
+{
+    cout << "[";
+    for (size_t i = 0; i < a.size(); ++i) {
+        if (i) cout << ", ";
+        cout << a[i];
+    }
+    cout << "]";
+}
+
+int main() {
+    setlocale(LC_ALL,"Russian");
+    int m = read_int("Введите m (1..7): ", 1, 7);
+    int k = read_int("Введите k (4..8): ", 4, 8);
+
+    random_device rd;
+    mt19937 gen(rd());
+    uniform_int_distribution<int> dist(k, 3 * k);
+
+    vector<int> array1(m), array2(m), array3(m), array4(m);
+    for (int i = 0; i < m; ++i) { array1[i] = dist(gen); array2[i] = dist(gen); array3[i] = dist(gen); array4[i] = dist(gen); }
+
+    cout << "\nСгенерированные массивы:\n";
+    cout << "array1: "; printArray(array1); cout << '\n';
+    cout << "array2: "; printArray(array2); cout << '\n';
+    cout << "array3: "; printArray(array3); cout << '\n';
+    cout << "array4: "; printArray(array4); cout << '\n';
+
+    cout << "\nПроизведение четных элементов:\n";
+    cout << "array1: ";
+    answer(array1);
+    cout << "array2: ";
+    answer(array2);
+    cout << "array3: ";
+    answer(array3);
+    cout << "array4: ";
+    answer(array4);
+    return 0;
+}
