@@ -1,6 +1,7 @@
 #include <iostream>
 #include <iomanip>
 #include <cmath>
+#include <clocale>
 
 using namespace std;
 
@@ -8,40 +9,96 @@ double f(double x) {
     return -0.3 * pow(x, 5) + 2.3 * x + 7.5;
 }
 
-int main() {
-    setlocale(LC_ALL,"Russian");
-    double a, b;
-    cin >> a >> b;
+bool find_interval(double &a, double &b,
+                   double x_min = -10.0, double x_max = 10.0,
+                   double step = 0.01, double max_len = 1.0) {
+    double x = x_min;
+    double prev_x = x;
+    double prev_f = f(prev_x);
+    for (x = x_min + step; x <= x_max + 1e-12; x += step) {
+        double cur_f = f(x);
+        if (prev_f * cur_f < 0.0) {
+            double left = prev_x;
+            double right = x;
+            if (right - left <= max_len) {
+                a = left;
+                b = right;
+                return true;
+            }
 
-    if (a > b) swap(a, b);
-    if (b - a > 1.0) {
-        cout << "Длина интервала больше 1. Программа завершена.\n";
-        return 0;
+            double seg_l = left;
+            while (seg_l < right - 1e-12) {
+                double seg_r = min(seg_l + max_len, right);
+                double f1 = f(seg_l);
+                double f2 = f(seg_r);
+                if (f1 * f2 < 0.0) {
+                    a = seg_l;
+                    b = seg_r;
+                    return true;
+                }
+                seg_l = seg_r;
+            }
+        }
+        prev_x = x;
+        prev_f = cur_f;
     }
+    return false;
+}
+
+int main() {
+    setlocale(LC_ALL, "");
+    cout << fixed << setprecision(5);
+
+    double a, b;
+    bool ok = find_interval(a, b, -1000.0, 1000.0, 0.01, 1.0);
+    if (!ok) {
+        cout << "Не удалось автоматически найти отрезок [a,b] с противоположными знаками и длиной не более 1.\n";
+        cout << "Можно задать a и b вручную в коде или увеличить диапазон поиска.\n";
+        return 1;
+    }
+
+    cout << "Найден отрезок: a = " << a << "  b = " << b << "\n";
 
     double fa = f(a);
     double fb = f(b);
 
-    if (fa == 0.0) { cout << fixed << setprecision(5) << "Корень в a: " << a << '\n'; return 0; }
-    if (fb == 0.0) { cout << fixed << setprecision(5) << "Корень в b: " << b << '\n'; return 0; }
-
-    if (fa * fb >= 0.0) {
-        cout << "Условие смены знака на концах отрезка не выполнено. f(a)="
-             << fixed << setprecision(5) << fa << " f(b)=" << fb << "\n";
+    if (fabs(fa) < 1e-12) {
+        cout << "Корень в a: " << a << "\n";
         return 0;
     }
+    if (fabs(fb) < 1e-12) {
+        cout << "Корень в b: " << b << "\n";
+        return 0;
+    }
+    if (fa * fb > 0.0) {
+        cout << "На найденном отрезке значения f имеют одинаковый знак: f(a)=" << fa << " f(b)=" << fb << "\n";
+        return 1;
+    }
 
-    cout << fixed << setprecision(5);
+    const double eps = 0.005;
     double left = a, right = b;
+    double fl = fa, fr = fb;
     int iter = 0;
 
-    while ((right - left) / 2.0 > 0.005) {
+    cout << "\nПромежуточные результаты (5 знаков):\n";
+    while ((right - left) / 2.0 > eps) {
         double mid = (left + right) / 2.0;
         double fm = f(mid);
-        cout << "Итерация " << ++iter << ": mid = " << mid << " f(mid) = " << fm << "\n";
-        if (fm == 0.0) { left = right = mid; break; }
-        if (fa * fm < 0.0) { right = mid; fb = fm; }
-        else { left = mid; fa = fm; }
+        cout << "Итерация " << ++iter << ": mid = " << mid << "  f(mid) = " << fm << "\n";
+
+        if (fabs(fm) < 1e-12) {
+            left = right = mid;
+            fl = fr = fm;
+            break;
+        }
+
+        if (fl * fm < 0.0) {
+            right = mid;
+            fr = fm;
+        } else {
+            left = mid;
+            fl = fm;
+        }
     }
 
     double root = (left + right) / 2.0;
