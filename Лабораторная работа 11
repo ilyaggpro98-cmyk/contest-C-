@@ -1,0 +1,50 @@
+#include <iostream>
+#include <iomanip>
+#include <cmath>
+
+using namespace std;
+
+double f(double x) {
+    return -0.3 * pow(x, 5) + 2.3 * x + 7.5;
+}
+
+int main() {
+    setlocale(LC_ALL,"Russian");
+    double a, b;
+    cin >> a >> b;
+
+    if (a > b) swap(a, b);
+    if (b - a > 1.0) {
+        cout << "Длина интервала больше 1. Программа завершена.\n";
+        return 0;
+    }
+
+    double fa = f(a);
+    double fb = f(b);
+
+    if (fa == 0.0) { cout << fixed << setprecision(5) << "Корень в a: " << a << '\n'; return 0; }
+    if (fb == 0.0) { cout << fixed << setprecision(5) << "Корень в b: " << b << '\n'; return 0; }
+
+    if (fa * fb >= 0.0) {
+        cout << "Условие смены знака на концах отрезка не выполнено. f(a)="
+             << fixed << setprecision(5) << fa << " f(b)=" << fb << "\n";
+        return 0;
+    }
+
+    cout << fixed << setprecision(5);
+    double left = a, right = b;
+    int iter = 0;
+
+    while ((right - left) / 2.0 > 0.005) {
+        double mid = (left + right) / 2.0;
+        double fm = f(mid);
+        cout << "Итерация " << ++iter << ": mid = " << mid << " f(mid) = " << fm << "\n";
+        if (fm == 0.0) { left = right = mid; break; }
+        if (fa * fm < 0.0) { right = mid; fb = fm; }
+        else { left = mid; fa = fm; }
+    }
+
+    double root = (left + right) / 2.0;
+    cout << "\nПриближенное значение корня (точность 0.005): " << root << "\n";
+    return 0;
+}
