@@ -1,0 +1,140 @@
+#include <bits/stdc++.h>
+using namespace std;
+const double PI = acos(-1.0);
+
+double integrand(double x) { return 0.7 * x * x + 3.2 * sin(x) + 1.5; }
+double antiderivative(double x) { return (0.7 / 3.0) * x * x * x - 3.2 * cos(x) + 1.5 * x; }
+
+void integrate() {
+    cout << "Доступные перегрузки integrate:\n";
+    cout << " - double integrate(fun, a, b, n)               : левые прямоугольники\n";
+    cout << " - double integrate(fun, a, b, n, char 'R')     : правые прямоугольники ('R')\n";
+    cout << " - double integrate(fun, a, b, n, string \"T\") : трапеции (\"T\")\n";
+    cout << " - double integrate(fun, a, b, n, int 2)        : Симпсон (параметр 2)\n";
+}
+
+double integrate(const function<double(double)>& fun, double a, double b, int n) {
+    double h = (b - a) / n, sum = 0.0;
+    for (int i = 0; i < n; ++i) sum += fun(a + i * h);
+    return sum * h;
+}
+
+double integrate(const function<double(double)>& fun, double a, double b, int n, char side) {
+    if (side == 'R' || side == 'r') {
+        double h = (b - a) / n, sum = 0.0;
+        for (int i = 1; i <= n; ++i) sum += fun(a + i * h);
+        return sum * h;
+    }
+    return numeric_limits<double>::quiet_NaN();
+}
+
+double integrate(const function<double(double)>& fun, double a, double b, int n, const string& method) {
+    if (method == "T" || method == "Trap" || method == "trapezoid") {
+        double h = (b - a) / n, sum = 0.5 * (fun(a) + fun(b));
+        for (int i = 1; i < n; ++i) sum += fun(a + i * h);
+        return sum * h;
+    }
+    return numeric_limits<double>::quiet_NaN();
+}
+
+int simpson_used_n(int n) { return (n % 2 == 0) ? n : n + 1; }
+double integrate(const function<double(double)>& fun, double a, double b, int n, int code) {
+    if (code == 2) {
+        int m = simpson_used_n(n);
+        double h = (b - a) / m, sum = fun(a) + fun(b);
+        for (int i = 1; i < m; ++i) {
+            double x = a + i * h;
+            sum += (i % 2 == 0) ? 2.0 * fun(x) : 4.0 * fun(x);
+        }
+        return sum * h / 3.0;
+    }
+    return numeric_limits<double>::quiet_NaN();
+}
+
+string format_double(double v, int prec) {
+    if (std::isnan(v)) return string("-");
+    ostringstream oss;
+    oss << fixed << setprecision(prec) << v;
+    return oss.str();
+}
+
+double rel_err_percent(double approx, double exact) {
+    if (exact == 0.0) return std::numeric_limits<double>::quiet_NaN();
+    return fabs((approx - exact) / exact) * 100.0;
+}
+
+int main() {
+    setlocale(LC_ALL, "Russian");
+
+    cout << "Формула PI / n. Введите числа p и q (a=PI/p, b=PI/q). Введите p и q:\n";
+    double p, q;
+    if (!(cin >> p >> q)) return 0;
+
+    double a = (p == 0.0) ? 0.0 : PI / p;
+    double b = (q == 0.0) ? 0.0 : PI / q;
+    if (a > b) swap(a, b);
+
+    cout << "Интегрируем f(x) = 0.7*x^2 + 3.2*sin(x) + 1.5 на отрезке [" << a << ", " << b << "]\n";
+
+    cout << "Введите целое k (>0): ";
+    int k;
+    cin >> k;
+    if (k <= 0) return 0;
+    int n1 = k;
+    int n2 = 10 * k;
+    double exact = antiderivative(b) - antiderivative(a);
+
+    double L1 = integrate(integrand, a, b, n1);
+    double L2 = integrate(integrand, a, b, n2);
+
+    double R1 = integrate(integrand, a, b, n1, 'R');
+    double R2 = integrate(integrand, a, b, n2, 'R');
+
+    double T1 = integrate(integrand, a, b, n1, string("T"));
+    double T2 = integrate(integrand, a, b, n2, string("T"));
+
+    int sn1 = simpson_used_n(n1), sn2 = simpson_used_n(n2);
+    double S1 = integrate(integrand, a, b, n1, 2);
+    double S2 = integrate(integrand, a, b, n2, 2);
+
+    double relL2 = rel_err_percent(L2, exact);
+    double relR2 = rel_err_percent(R2, exact);
+    double relT2 = rel_err_percent(T2, exact);
+    double relS2 = rel_err_percent(S2, exact);
+
+    cout << "\n" << "Точное значение интеграла: " << format_double(exact, 4) << "\n\n";
+
+    cout << left << setw(20) << ""
+         << right << setw(12) << "Зн (n=k)"
+         << setw(12) << "Погр(k)"
+         << setw(12) << "Зн (10k)"
+         << setw(12) << "Погр(10k)"
+         << setw(12) << "%Погр(10k)"
+         << setw(12) << "Точное" << "\n";
+    cout << string(92, '-') << "\n";
+
+    auto print_line = [&](const string &name, double v1, double e1, double v2, double e2, double rel2){
+        cout << left << setw(20) << name
+             << right << setw(12) << format_double(v1,4)
+             << setw(12) << format_double(e1,4)
+             << setw(12) << format_double(v2,4)
+             << setw(12) << format_double(e2,4)
+             << setw(12) << (std::isnan(rel2) ? string("-") : format_double(rel2,2))
+             << setw(12) << format_double(exact,4)
+             << "\n";
+    };
+
+    print_line("Левые прям.", L1, fabs(L1 - exact), L2, fabs(L2 - exact), relL2);
+    print_line("Правые прям.", R1, fabs(R1 - exact), R2, fabs(R2 - exact), relR2);
+    print_line("Трапеции", T1, fabs(T1 - exact), T2, fabs(T2 - exact), relT2);
+
+    ostringstream sname;
+    sname << "Симпсон (m=" << sn2 << ")";
+    print_line(sname.str(), S1, fabs(S1 - exact), S2, fabs(S2 - exact), relS2);
+
+    cout << string(92, '-') << "\n";
+
+    cout << "\nСправка по перегрузкам:\n";
+    integrate();
+
+}
