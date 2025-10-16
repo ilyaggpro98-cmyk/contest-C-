@@ -1,0 +1,25 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+void F(int N, int& First, int& Last)
+{
+    Last = N % 10;
+    First = N;
+    while (First >= 10)
+        First /= 10;
+}
+
+int main()
+{
+    setlocale(LC_ALL,"Russian");
+    cout << "Выведите натуральное число N: ";
+    int N;
+    cin >> N;
+    cout << "\n\n";
+
+    int First, Last;
+    F(N, First, Last);
+    cout << "Старшая цифра: " << First << "\n";
+    cout << "Младшая цифра: " << Last << "\n";
+    return 0;
+}
