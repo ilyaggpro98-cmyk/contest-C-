@@ -1,0 +1,57 @@
+#include <iostream>
+using namespace std;
+
+void swapByValue(int x, int y)
+{
+    int temp = x;
+    x = y;
+    y = temp;
+    cout << "Внутри swapByValue: x=" << x << " y=" << y << endl;
+}
+
+void swapByPointer(int *x, int *y)
+{
+    int temp = *x;
+    *x = *y;
+    *y = temp;
+}
+
+void swapByReference(int &x, int &y)
+{
+    int temp = x;
+    x = y;
+    y = temp;
+}
+
+int main()
+{
+    setlocale(LC_ALL,"Russian");
+    int a = 3, b = 5;
+
+    cout << "=== ИСХОДНЫЕ ЗНАЧЕНИЯ ===" << endl;
+    cout << "a = " << a << ", b = " << b << endl << endl;
+
+    cout << "1. ПЕРЕДАЧА ПО ЗНАЧЕНИЮ:" << endl;
+    cout << "До вызова: a = " << a << ", b = " << b << endl;
+    swapByValue(a, b);
+    cout << "После вызова: a = " << a << ", b = " << b << " - НЕ ИЗМЕНИЛИСЬ!" << endl << endl;
+
+    cout << "2. ПЕРЕДАЧА УКАЗАТЕЛЕЙ:" << endl;
+    a = 3; b = 5;
+    cout << "До вызова: a = " << a << ", b = " << b << endl;
+    swapByPointer(&a, &b);
+    cout << "После вызова: a = " << a << ", b = " << b << " - УСПЕШНО ОБМЕНИЛИСЬ!" << endl << endl;
+
+    cout << "3. ПЕРЕДАЧА ПО ССЫЛКЕ:" << endl;
+    a = 3; b = 5;
+    cout << "До вызова: a = " << a << ", b = " << b << endl;
+    swapByReference(a, b);
+    cout << "После вызова: a = " << a << ", b = " << b << " - УСПЕШНО ОБМЕНИЛИСЬ!" << endl << endl;
+
+    cout << "=== ВЫВОД ===" << endl;
+    cout << "Передача по значению: НЕ ИЗМЕНЯЕТ исходные переменные (работает с копиями)" << endl;
+    cout << "Передача указателей: РАБОТАЕТ, но требует передачи адресов (&)" << endl;
+    cout << "Передача по ссылке: РАБОТАЕТ, наиболее удобный и безопасный вариант" << endl;
+
+    return 0;
+}
