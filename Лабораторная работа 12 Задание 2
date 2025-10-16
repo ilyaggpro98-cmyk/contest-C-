@@ -1,1 +1,73 @@
+#include <bits/stdc++.h>
+using ll = long long;
+using namespace std;
+const ll INF = 1e18;
+const ll mod = 1e9 + 7;
+
+void Solve()
+{
+    setlocale(LC_ALL,"Russian");
+    int n;
+    double p;
+    cout << "Введите n (n <= 10): ";
+    if (!(cin >> n) || n <= 0 || n > 10) {
+        cerr << "Ошибка: n должно быть целым в диапазоне [1, 10].\n";
+        return ;
+    }
+    cout << "Введите p (p >= 2): ";
+    if (!(cin >> p) || p < 2.0) {
+        cerr << "Ошибка: p должно быть >= 2.\n";
+        return ;
+    }
+
+    random_device rd;
+    mt19937 gen(rd());
+    double a = 0.5 * p;
+    double b = 3.5 * p;
+    uniform_real_distribution<double> dist(a, b);
+
+    vector<double> arr(n);
+    for (int i = 0; i < n; ++i) arr[i] = dist(gen);
+
+    cout << fixed << setprecision(6);
+    cout << "Сформированный массив:\n";
+    for (int i = 0; i < n; ++i) {
+        cout << "arr[" << i << "] = " << arr[i] << '\n';
+    }
+
+    double mx = arr[0];
+    for (double v : arr) if (v > mx) mx = v;
+
+    vector<int> idx;
+    double prod = 1.0;
+    for (int i = 0; i < n; ++i) {
+        if (arr[i] < mx) {
+            idx.push_back(i);
+            prod *= arr[i];
+        }
+    }
+
+    if (idx.empty()) {
+        cout << "Нет элементов, строго меньших максимального (" << mx << ").\n";
+    } else {
+        cout << "Индексы элементов, значения которых меньше максимального (" << mx << "):\n";
+        for (size_t k = 0; k < idx.size(); ++k) {
+            if (k) cout << ", ";
+            cout << idx[k];
+        }
+        cout << '\n';
+        cout << "Произведение значений этих элементов: " << prod << '\n';
+    }
+
+}
+int main()
+{
+   // cin.tie(nullptr)->sync_with_stdio(false);
+    ll tt = 1;
+
+    while (tt-->0)
+    {
+        Solve();
+    }
+}
 
