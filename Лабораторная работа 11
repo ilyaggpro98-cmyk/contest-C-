@@ -1,107 +1,129 @@
-#include <iostream>
-#include <iomanip>
-#include <cmath>
-#include <clocale>
-
+#include <bits/stdc++.h>
 using namespace std;
 
-double f(double x) {
-    return -0.3 * pow(x, 5) + 2.3 * x + 7.5;
+double f(double x)
+{
+    return -0.3 * pow(x,5) + 2.3 * x + 7.5;
 }
 
-bool find_interval(double &a, double &b,
-                   double x_min = -10.0, double x_max = 10.0,
-                   double step = 0.01, double max_len = 1.0) {
-    double x = x_min;
-    double prev_x = x;
-    double prev_f = f(prev_x);
-    for (x = x_min + step; x <= x_max + 1e-12; x += step) {
-        double cur_f = f(x);
-        if (prev_f * cur_f < 0.0) {
-            double left = prev_x;
-            double right = x;
-            if (right - left <= max_len) {
-                a = left;
-                b = right;
-                return true;
-            }
+const double INF = 1e9;
 
-            double seg_l = left;
-            while (seg_l < right - 1e-12) {
-                double seg_r = min(seg_l + max_len, right);
-                double f1 = f(seg_l);
-                double f2 = f(seg_r);
-                if (f1 * f2 < 0.0) {
-                    a = seg_l;
-                    b = seg_r;
-                    return true;
-                }
-                seg_l = seg_r;
-            }
-        }
-        prev_x = x;
-        prev_f = cur_f;
-    }
-    return false;
-}
-
-int main() {
-    setlocale(LC_ALL, "");
-    cout << fixed << setprecision(5);
-
-    double a, b;
-    bool ok = find_interval(a, b, -1000.0, 1000.0, 0.01, 1.0);
-    if (!ok) {
-        cout << "Не удалось автоматически найти отрезок [a,b] с противоположными знаками и длиной не более 1.\n";
-        cout << "Можно задать a и b вручную в коде или увеличить диапазон поиска.\n";
-        return 1;
+void Solve()
+{
+    const double coef_num = 2.3;
+    const double coef_den = 1.5;
+    double base = coef_num / coef_den;
+    if (base < 0.0) {
+        cout << "Нет вещественных корней для производной\n";
+        return;
     }
 
-    cout << "Найден отрезок: a = " << a << "  b = " << b << "\n";
+    double r = pow(base, 1.0 / 4.0);
+    double x1 = -r;
+    double x2 = r;
+    if (x1 > x2) swap(x1, x2);
 
-    double fa = f(a);
-    double fb = f(b);
-
-    if (fabs(fa) < 1e-12) {
-        cout << "Корень в a: " << a << "\n";
-        return 0;
-    }
-    if (fabs(fb) < 1e-12) {
-        cout << "Корень в b: " << b << "\n";
-        return 0;
-    }
-    if (fa * fb > 0.0) {
-        cout << "На найденном отрезке значения f имеют одинаковый знак: f(a)=" << fa << " f(b)=" << fb << "\n";
-        return 1;
-    }
+    cout.setf(std::ios::fixed);
+    cout << setprecision(5);
+    cout << "Корни производной f'(x)=0: x1 = " << x1 << " , x2 = " << x2 << '\n';
+    cout << "Значения функции в этих точках: f(x1) = " << f(x1) << " , f(x2) = " << f(x2) << "\n\n";
 
     const double eps = 0.005;
-    double left = a, right = b;
-    double fl = fa, fr = fb;
-    int iter = 0;
+    const double maxStep = 1.0;
+    const double scanM = 10.0;
 
-    cout << "\nПромежуточные результаты (5 знаков):\n";
-    while ((right - left) / 2.0 > eps) {
-        double mid = (left + right) / 2.0;
-        double fm = f(mid);
-        cout << "Итерация " << ++iter << ": mid = " << mid << "  f(mid) = " << fm << "\n";
+    vector<pair<double,double>> res;
+    res.push_back({-INF, x1});
+    res.push_back({x1, x2});
+    res.push_back({x2, INF});
 
-        if (fabs(fm) < 1e-12) {
-            left = right = mid;
-            fl = fr = fm;
-            break;
+    for (auto [Lreg, Rreg] : res)
+    {
+        double L = Lreg;
+        double R = Rreg;
+
+        swap(L,R); // этот случай не нужен
+        double fL = f(L);
+        double fR = f(R);
+
+        if (!(fL < 0.0 && fR > 0.0)) continue;
+
+        double left = L;
+        double right = R;
+        double fl = fL;
+        double fr = fR;
+
+        int iter_limit = 0;
+        while (right - left > maxStep && iter_limit < 200)
+        {
+            double mid = (left + right) / 2.0;
+            double fm = f(mid);
+
+            if (fl < 0.0 && fm > 0.0)
+            {
+                right = mid;
+                fr = fm;
+            }
+            else if (fm < 0.0 && fr > 0.0)
+            {
+                left = mid;
+                fl = fm;
+            }
+            else
+            {
+                if (fabs(fm) < 1e-15)
+                {
+                    left = mid;
+                    right = mid;
+                    fl = fr = fm;
+                    break;
+                }
+                double lmid = (left + mid) / 2.0;
+                double rmid = (mid + right) / 2.0;
+                double flmid = f(lmid);
+                double frmid = f(rmid);
+
+                if (fl < 0.0 && flmid > 0.0) { right = lmid; fr = flmid; }
+                else if (flmid < 0.0 && fr > 0.0) { left = lmid; fl = flmid; }
+                else if (fm < 0.0 && frmid > 0.0) { right = rmid; fr = frmid; }
+                else if (fl < 0.0 && frmid > 0.0) { left = rmid; fl = frmid; }
+                else break;
+            }
+            ++iter_limit;
         }
 
-        if (fl * fm < 0.0) {
-            right = mid;
-            fr = fm;
-        } else {
-            left = mid;
-            fl = fm;
+
+        double A = left;
+        double B = right;
+        cout << "Найден интервал A = " << A << " , B = " << B << "\n";
+        cout << "f(A) = " << fl << " , f(B) = " << fr << "\n\n";
+        int step = 1;
+        while (true)
+        {
+            double xm = (A + B) / 2.0;
+            double fxm = f(xm);
+            if (fxm == 0.0)
+            {
+                cout << "Корень == " << xm << '\n';
+                return;
+            }
+            cout << "x" << step << " = " << xm << "   f(x" << step << ") = " << fxm << "\n";
+            if (fxm < 0.0) A = xm; else B = xm;
+            ++step;
+            if (step > 100) break;
         }
+
+        double root = (A + B) / 2.0;
+        cout << "\nПриближение корня с точностью " << eps << ": " << root << "\n";
+        cout << "f(root) = " << f(root) << "\n";
+        return;
     }
 
-    double root = (left + right) / 2.0;
-    cout << "\nПриближенное значение корня (точность 0.005): " << root << "\n";
-    return 0;
+    cout << "Не найдено регионов с требуемым изменением знака f(A) < 0 и f(B) > 0\n";
+}
+
+int main()
+{
+    setlocale(LC_ALL,"Russian");
+    Solve();
 }
