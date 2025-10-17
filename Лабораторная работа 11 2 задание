@@ -13,16 +13,16 @@ int reverseDigitsInt(int n) {
     return res * sign;
 }
 
-void flip_ptr(int* N) {
+void flip(int* N,char s) {
     if (N == nullptr) return;
     *N = reverseDigitsInt(*N);
 }
 
-void flip_ref(int& N) {
+void flip(int& N,string mid) {
     N = reverseDigitsInt(N);
 }
 
-int flip_val(int N) {
+int flip(int N) {
     return reverseDigitsInt(N);
 }
 
@@ -31,18 +31,19 @@ int main() {
 
     int a1 = 567321;
     cout << "Исходное a1 = " << a1 << "\n";
-    flip_ptr(&a1);
-    cout << "После flip_ptr(&a1): a1 = " << a1 << "\n\n";
+
+    flip(&a1,'T');
+    cout << "После flip(&a1,char): a1 = " << a1 << "\n\n";
 
     int a2 = 567321;
     cout << "Исходное a2 = " << a2 << "\n";
-    flip_ref(a2);
-    cout << "После flip_ref(a2): a2 = " << a2 << "\n\n";
+    flip(a2,"string");
+    cout << "После flip(a2,string): a2 = " << a2 << "\n\n";
 
     int a3 = 567321;
     cout << "Исходное a3 = " << a3 << "\n";
-    int r = flip_val(a3);
-    cout << "После flip_val(a3): исходное a3 = " << a3 << " , возвращено = " << r << "\n";
+    int r = flip(a3);
+    cout << "После flip(a3): исходное a3 = " << a3 << " , возвращено = " << r << "\n";
 
     return 0;
 }
