@@ -33,9 +33,13 @@ void Solve()
     const double scanM = 10.0;
 
     vector<pair<double,double>> res;
-    res.push_back({-INF, x1});
-    res.push_back({x1, x2});
-    res.push_back({x2, INF});
+    cout << "Выведите значения a,b:\n";
+    double a,b;
+    cin >> a >> b;
+
+    res.push_back({a,b});
+
+
 
     for (auto [Lreg, Rreg] : res)
     {
