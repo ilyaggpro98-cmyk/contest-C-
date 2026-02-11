@@ -1,0 +1,104 @@
+#include <iostream>
+using namespace std;
+
+struct Node {
+    int data;
+    Node* next;
+};
+
+
+struct Stack {
+    Node* top;
+};
+
+
+void init(Stack &s) {
+    s.top = nullptr;
+}
+
+void push(Stack &s, int value) {
+    Node* newNode = new Node;
+    newNode->data = value;
+    newNode->next = s.top;
+    s.top = newNode;
+}
+
+void pop(Stack &s) {
+    if (s.top == nullptr) {
+        cout << "Стек пуст!\n";
+        return;
+    }
+    Node* temp = s.top;
+    cout << "Удален элемент: " << temp->data << endl;
+    s.top = s.top->next;
+    delete temp;
+}
+
+
+void peek(const Stack &s) {
+    if (s.top == nullptr) {
+        cout << "Стек пуст!\n";
+        return;
+    }
+    cout << "Вершина стека: " << s.top->data << endl;
+}
+
+void stack_List(const Stack &s) {
+    if (s.top == nullptr) {
+        cout << "Стек пуст!\n";
+        return;
+    }
+    cout << "Элементы стека: ";
+    Node* current = s.top;
+    while (current != nullptr) {
+        cout << current->data << " ";
+        current = current->next;
+    }
+    cout << endl;
+}
+
+bool isEmpty(const Stack &s) {
+    return s.top == nullptr;
+}
+
+int main() {
+    setlocale(LC_ALL,"Russian");
+    Stack s;
+    init(s);
+
+    int choice, value;
+    do {
+        cout << "\nМеню:\n";
+        cout << "1. Добавить элемент (push)\n";
+        cout << "2. Удалить элемент (pop)\n";
+        cout << "3. Просмотреть вершину (peek)\n";
+        cout << "4. Вывести элементы (stack_List)\n";
+        cout << "5. Проверить пустоту (isEmpty)\n";
+        cout << "0. Выход\n";
+        cout << "Ваш выбор: ";
+        cin >> choice;
+
+        switch (choice) {
+            case 1:
+                cout << "Введите значение: ";
+                cin >> value;
+                push(s, value);
+                break;
+            case 2:
+                pop(s);
+                break;
+            case 3:
+                peek(s);
+                break;
+            case 4:
+                stack_List(s);
+                break;
+            case 5:
+                if (isEmpty(s)) cout << "Стек пуст.\n";
+                else cout << "Стек не пуст.\n";
+                break;
+        }
+    } while (choice != 0);
+
+    return 0;
+}
