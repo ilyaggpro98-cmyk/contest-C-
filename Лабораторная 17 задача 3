@@ -1,0 +1,97 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+struct Student {
+    string lastName;
+    string firstName;
+    string middleName;
+    string gender;
+    int age;
+    int course;
+    float averageGrade;
+};
+
+Student inputStudent() {
+    Student s;
+    cout << "Фамилия: ";
+    cin >> s.lastName;
+    cout << "Имя: ";
+    cin >> s.firstName;
+    cout << "Отчество: ";
+    cin >> s.middleName;
+    cout << "Пол: ";
+    cin >> s.gender;
+    cout << "Возраст: ";
+    cin >> s.age;
+    cout << "Курс: ";
+    cin >> s.course;
+    cout << "Средний балл: ";
+    cin >> s.averageGrade;
+    return s;
+}
+
+void outputStudent(const Student& s) {
+    cout << s.lastName << " " << s.firstName << " " << s.middleName
+         << ", пол: " << s.gender
+         << ", возраст: " << s.age
+         << ", курс: " << s.course
+         << ", средний балл: " << s.averageGrade << endl;
+}
+
+void findOldestStudents(Student students[], int n, int course) {
+    int maxAge = -1;
+    for (int i = 0; i < n; i++) {
+        if (students[i].course == course && students[i].age > maxAge) {
+            maxAge = students[i].age;
+        }
+    }
+
+    if (maxAge == -1) {
+        cout << "На курсе " << course << " студентов нет." << endl;
+        return;
+    }
+
+    cout << "Самые старшие студенты " << course << " курса:" << endl;
+    for (int i = 0; i < n; i++) {
+        if (students[i].course == course && students[i].age == maxAge) {
+            cout << students[i].lastName << " "
+                 << students[i].firstName << " "
+                 << students[i].middleName << endl;
+        }
+    }
+}
+
+const int nn = 5;
+Student res[nn] = {
+    {"Иванов", "Иван", "Иванович", "муж", 21, 3, 7.8},
+    {"Петрова", "Мария", "Сергеевна", "жен", 22, 3, 8.5},
+    {"Сидоров", "Алексей", "Павлович", "муж", 23, 3, 6.9},
+    {"Кузнецова", "Ольга", "Игоревна", "жен", 20, 2, 9.1},
+    {"Михайлов", "Дмитрий", "Андреевич", "муж", 24, 3, 7.2}
+};
+
+int main() {
+    setlocale(LC_ALL, "Russian");
+
+    int n = nn; //
+    Student* students = res; //
+
+  /*   Student* students = new Student[n];
+     for (int i = 0; i < n; i++)
+    {
+        cout << "Студент #" << i+1 << endl;
+        students[i] = inputStudent();
+    } */
+
+
+    cout << "Список студентов:" << endl;
+    for (int i = 0; i < n; i++) {
+        outputStudent(students[i]);
+    }
+
+    int course;
+    cout << "Введите номер курса для поиска: ";
+    cin >> course;
+
+    findOldestStudents(students, n, course);
+}
