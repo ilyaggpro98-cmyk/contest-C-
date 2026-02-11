@@ -1,0 +1,106 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+struct Node {
+    int data;
+    Node* next;
+};
+
+struct Queue {
+    Node* front;
+    Node* rear;
+};
+
+void init(Queue &q) {
+    q.front = q.rear = nullptr;
+}
+
+bool isEmpty(const Queue &q) {
+    return q.front == nullptr;
+}
+
+void push(Queue &q, int value) {
+    Node* newNode = new Node;
+    newNode->data = value;
+    newNode->next = nullptr;
+    if (q.rear == nullptr) {
+        q.front = q.rear = newNode;
+    } else {
+        q.rear->next = newNode;
+        q.rear = newNode;
+    }
+}
+
+void pop(Queue &q) {
+    if (isEmpty(q)) return;
+    Node* temp = q.front;
+    q.front = q.front->next;
+    if (q.front == nullptr) q.rear = nullptr;
+    delete temp;
+}
+
+int peek(const Queue &q) {
+    if (isEmpty(q)) return -1;
+    return q.front->data;
+}
+
+void queue_List(const Queue &q) {
+    if (isEmpty(q)) {
+        cout << "Очередь пуста!\n";
+        return;
+    }
+    Node* current = q.front;
+    cout << "Элементы очереди: ";
+    while (current != nullptr) {
+        cout << current->data << " ";
+        current = current->next;
+    }
+    cout << endl;
+}
+
+int digitSum(int num) {
+    int sum = 0;
+    while (num > 0) {
+        sum += num % 10;
+        num /= 10;
+    }
+    return sum;
+}
+
+void removeLowDigitSum(Queue &q) {
+    Queue newQ;
+    init(newQ);
+
+    while (!isEmpty(q)) {
+        int val = peek(q);
+        pop(q);
+        if (digitSum(val) >= 16) {
+            push(newQ, val);
+        }
+    }
+    q = newQ;
+}
+
+int main() {
+    setlocale(LC_ALL, "Russian");
+    srand(time(0));
+
+    Queue q;
+    init(q);
+
+    int n = 8 + rand() % 7;
+    cout << "Количество узлов: " << n << endl;
+
+    for (int i = 0; i < n; i++) {
+        int value = rand() % 100000;
+        push(q, value);
+    }
+
+    cout << "Исходная очередь:\n";
+    queue_List(q);
+
+    removeLowDigitSum(q);
+
+    cout << "Очередь после удаления элементов с суммой цифр < 16:\n";
+    queue_List(q);
+}
