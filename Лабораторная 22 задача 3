@@ -1,0 +1,90 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+struct Node {
+    int info;
+    Node* prev;
+    Node* next;
+};
+
+struct List {
+    Node* head;
+    Node* tail;
+};
+
+void init(List &lst) {
+    lst.head = lst.tail = nullptr;
+}
+
+void pushBack(List &lst, int value) {
+    Node* newNode = new Node;
+    newNode->info = value;
+    newNode->next = nullptr;
+    newNode->prev = lst.tail;
+    if (lst.tail) lst.tail->next = newNode;
+    else lst.head = newNode;
+    lst.tail = newNode;
+}
+
+void printList(const List &lst) {
+    Node* cur = lst.head;
+    cout << "Список: ";
+    while (cur) {
+        cout << cur->info << " ";
+        cur = cur->next;
+    }
+    cout << endl;
+}
+
+int countEvenDigits(int num) {
+    int cnt = 0;
+    if (num == 0) return 1;
+    while (num > 0) {
+        int d = num % 10;
+        if (d % 2 == 0) cnt++;
+        num /= 10;
+    }
+    return cnt;
+}
+
+void deleteTwoEvenDigits(List &lst) {
+    Node* cur = lst.head;
+    while (cur) {
+        Node* next = cur->next;
+        if (countEvenDigits(cur->info) == 2) {
+            // удаляем узел
+            if (cur->prev) cur->prev->next = cur->next;
+            else lst.head = cur->next;
+            if (cur->next) cur->next->prev = cur->prev;
+            else lst.tail = cur->prev;
+            delete cur;
+        }
+        cur = next;
+    }
+}
+
+int main() {
+    setlocale(LC_ALL, "Russian");
+    srand(time(0));
+
+    List lst;
+    init(lst);
+
+    int n = 6 + rand() % 10;
+    cout << "Количество узлов: " << n << endl;
+
+    for (int i = 0; i < n; i++) {
+        int value = rand() % 10000;
+        pushBack(lst, value);
+    }
+
+    cout << "Исходный список:\n";
+    printList(lst);
+
+    deleteTwoEvenDigits(lst);
+
+    cout << "Список после удаления узлов с ровно двумя четными цифрами:\n";
+    printList(lst);
+
+    return 0;
+}
