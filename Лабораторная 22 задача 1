@@ -1,0 +1,108 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+struct Node {
+    int data;
+    Node* next;
+};
+
+struct Queue {
+    Node* front;
+    Node* rear;
+};
+
+void init(Queue &q) {
+    q.front = q.rear = nullptr;
+}
+
+void push(Queue &q, int value) {
+    Node* newNode = new Node;
+    newNode->data = value;
+    newNode->next = nullptr;
+    if (q.rear == nullptr) {
+        q.front = q.rear = newNode;
+    } else {
+        q.rear->next = newNode;
+        q.rear = newNode;
+    }
+}
+
+void pop(Queue &q) {
+    if (q.front == nullptr) {
+        cout << "Очередь пуста!\n";
+        return;
+    }
+    Node* temp = q.front;
+    cout << "Удален элемент: " << temp->data << endl;
+    q.front = q.front->next;
+    if (q.front == nullptr) q.rear = nullptr;
+    delete temp;
+}
+
+void peek(const Queue &q) {
+    if (q.front == nullptr) {
+        cout << "Очередь пуста!\n";
+        return;
+    }
+    cout << "Первый элемент очереди: " << q.front->data << endl;
+}
+
+void queue_List(const Queue &q) {
+    if (q.front == nullptr) {
+        cout << "Очередь пуста!\n";
+        return;
+    }
+    cout << "Элементы очереди: ";
+    Node* current = q.front;
+    while (current != nullptr) {
+        cout << current->data << " ";
+        current = current->next;
+    }
+    cout << endl;
+}
+
+bool isEmpty(const Queue &q) {
+    return q.front == nullptr;
+}
+
+int main() {
+    setlocale(LC_ALL, "Russian");
+    Queue q;
+    init(q);
+
+    int choice, value;
+    do {
+        cout << "\nМеню:\n";
+        cout << "1. Добавить элемент (push)\n";
+        cout << "2. Удалить элемент (pop)\n";
+        cout << "3. Просмотреть первый элемент (peek)\n";
+        cout << "4. Вывести элементы (queue_List)\n";
+        cout << "5. Проверить пустоту (isEmpty)\n";
+        cout << "0. Выход\n";
+        cout << "Ваш выбор: ";
+        cin >> choice;
+
+        switch (choice) {
+            case 1:
+                cout << "Введите значение: ";
+                cin >> value;
+                push(q, value);
+                break;
+            case 2:
+                pop(q);
+                break;
+            case 3:
+                peek(q);
+                break;
+            case 4:
+                queue_List(q);
+                break;
+            case 5:
+                if (isEmpty(q)) cout << "Очередь пуста.\n";
+                else cout << "Очередь не пуста.\n";
+                break;
+        }
+    } while (choice != 0);
+
+    return 0;
+}
