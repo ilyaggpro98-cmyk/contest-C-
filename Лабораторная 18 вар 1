@@ -1,0 +1,65 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+struct STUDENT {
+    string recordBookNumber; // номер зачетной книжки
+    string lastName;         // фамилия
+    string firstName;        // имя
+    string middleName;       // отчество
+    string groupNumber;      // номер группы
+    float averageGrade;      // средний балл
+
+    // Конструктор по умолчанию
+    STUDENT() : recordBookNumber(""), lastName(""), firstName(""),
+                middleName(""), groupNumber(""), averageGrade(0.0f) {
+        cout << "Вызван конструктор по умолчанию STUDENT\n";
+    }
+
+    // Конструктор с параметрами
+    STUDENT(string rb, string ln, string fn, string mn, string gn, float ag)
+        : recordBookNumber(rb), lastName(ln), firstName(fn),
+          middleName(mn), groupNumber(gn), averageGrade(ag) {
+        cout << "Создан студент: " << lastName << " " << firstName << endl;
+    }
+
+    // Деструктор
+    ~STUDENT() {
+        cout << "Удаляется студент: " << lastName << " " << firstName << endl;
+    }
+
+    void input() {
+        cout << "Введите номер зачетной книжки: ";
+        cin >> recordBookNumber;
+        cout << "Введите фамилию: ";
+        cin >> lastName;
+        cout << "Введите имя: ";
+        cin >> firstName;
+        cout << "Введите отчество: ";
+        cin >> middleName;
+        cout << "Введите номер группы: ";
+        cin >> groupNumber;
+        cout << "Введите средний балл: ";
+        cin >> averageGrade;
+    }
+
+    void output() const {
+        cout << "Зачетная книжка: " << recordBookNumber << endl;
+        cout << "ФИО: " << lastName << " " << firstName << " " << middleName << endl;
+        cout << "Группа: " << groupNumber << endl;
+        cout << "Средний балл: " << averageGrade << endl;
+    }
+};
+
+int main() {
+    setlocale(LC_ALL,"Russian");
+    // Создание студента через конструктор с параметрами
+    STUDENT s1("12345", "Иванов", "Иван", "Иванович", "101", 8.2);
+    s1.output();
+    cout << "\nВвод нового студента:\n";
+    STUDENT s2; 
+    s2.input();
+    cout << "\nДанные студента:\n";
+    s2.output();
+
+    return 0;
+}
