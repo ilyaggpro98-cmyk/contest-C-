@@ -1,0 +1,75 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+// Цена в рублях и копейках
+struct Price {
+    int rubles;
+    int kopecks;
+};
+
+// Время в часах, минутах, секундах
+struct Time {
+    int hours;
+    int minutes;
+    int seconds;
+};
+
+// Дата: число, месяц, год
+struct Date {
+    int day;
+    int month;
+    int year;
+};
+
+// Адрес: индекс, город, улица, дом, квартира
+struct Address {
+    int postalCode;
+    string city;
+    string street;
+    int house;
+    int apartment;
+};
+
+// Информация о студенте
+struct Student {
+    string lastName;
+    string firstName;
+    string middleName;
+    string recordBookNumber;
+    int grade; // экзаменационная оценка
+};
+
+// Экзаменационная ведомость
+struct ExamRecord {
+    string subject;
+    string groupNumber;
+    Date examDate;
+    Student students[30]; // массив из 30 студентов
+};
+
+int main() {
+    setlocale(LC_ALL,"Russian");
+    Price p = {100, 50};
+    Time t = {12, 30, 45};
+    Date d = {11, 2, 2026};
+    Address a = {230000, "Гродно", "Советская", 10, 5};
+
+    ExamRecord exam;
+    exam.subject = "Математика";
+    exam.groupNumber = "101";
+    exam.examDate = d;
+    exam.students[0] = {"Иванов", "Иван", "Иванович", "12345", 5};
+
+    cout << "Цена: " << p.rubles << " руб. " << p.kopecks << " коп." << endl;
+    cout << "Время: " << t.hours << ":" << t.minutes << ":" << t.seconds << endl;
+    cout << "Дата: " << d.day << "." << d.month << "." << d.year << endl;
+    cout << "Адрес: " << a.postalCode << ", " << a.city << ", ул. "
+         << a.street << ", д. " << a.house << ", кв. " << a.apartment << endl;
+    cout << "Экзамен: " << exam.subject << ", группа " << exam.groupNumber
+         << ", дата " << exam.examDate.day << "." << exam.examDate.month << "." << exam.examDate.year << endl;
+    cout << "Первый студент: " << exam.students[0].lastName << " "
+         << exam.students[0].firstName << " " << exam.students[0].middleName
+         << ", зачетка №" << exam.students[0].recordBookNumber
+         << ", оценка " << exam.students[0].grade << endl;
+
+}
