@@ -1,0 +1,51 @@
+#include <bits/stdc++.h>
+using namespace std;
+using ll = long long;
+
+void Solve1()
+{
+    ll A,i;
+    cout << "Введите целое число A: ";
+    cin >> A;
+    cout << '\n';
+    cout << "Введите натуральное число i: ";
+    cin >> i;
+    cout << '\n';
+
+    cout << "Результат === ";
+
+    ll mask = ~((1ll << i) - 1);
+    ll res = (A & mask);
+
+   /* bitset <32> g(mask);
+    for (int i = 0; i < 31; i++)
+        cout << g[i] << ' ';
+    cout << '\n';
+
+    bitset <32> gr(A);
+    for (int i = 0; i < 31; i++)
+        cout << gr[i] << ' ';
+    cout << '\n'; */
+    cout << res << '\n';
+}
+void Solve4()
+{
+    ll A,i;
+    cout << "Введите целое число A: ";
+    cin >> A;
+    cout << '\n';
+    cout << "Введите натуральное число i: ";
+    cin >> i;
+    cout << '\n';
+
+    cout << "Результат === ";
+
+    ll res = (A | (1ll << i));
+    cout << res << '\n';
+}
+int main()
+{
+    setlocale(LC_ALL,"Russian");
+    // Solve1();
+    // Solve4();
+}
