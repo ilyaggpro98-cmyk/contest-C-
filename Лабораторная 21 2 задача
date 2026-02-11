@@ -1,0 +1,77 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+struct Node {
+    char data;
+    Node* next;
+};
+
+struct Stack {
+    Node* top;
+};
+
+void init(Stack &s) {
+    s.top = nullptr;
+}
+
+void push(Stack &s, char value) {
+    Node* newNode = new Node;
+    newNode->data = value;
+    newNode->next = s.top;
+    s.top = newNode;
+}
+
+char pop(Stack &s) {
+    if (s.top == nullptr) {
+        return '\0';
+    }
+    Node* temp = s.top;
+    char value = temp->data;
+    s.top = s.top->next;
+    delete temp;
+    return value;
+}
+
+char peek(const Stack &s) {
+    if (s.top == nullptr) return '\0';
+    return s.top->data;
+}
+
+bool isEmpty(const Stack &s) {
+    return s.top == nullptr;
+}
+
+bool isBalanced(const string &expr) {
+    Stack s;
+    init(s);
+
+    for (char ch : expr) {
+        if (ch == '(' || ch == '[' || ch == '{') {
+            push(s, ch);
+        } else if (ch == ')' || ch == ']' || ch == '}') {
+            if (isEmpty(s)) return false;
+            char top = pop(s);
+            if ((ch == ')' && top != '(') ||
+                (ch == ']' && top != '[') ||
+                (ch == '}' && top != '{')) {
+                return false;
+            }
+        }
+    }
+    return isEmpty(s);
+}
+
+int main() {
+    setlocale(LC_ALL, "Russian");
+    string expr;
+    cout << "Введите выражение: ";
+    getline(cin, expr);
+
+    if (isBalanced(expr)) {
+        cout << "Баланс скобок правильный.\n";
+    } else {
+        cout << "Баланс скобок нарушен.\n";
+    }
+
+    return 0;
+}
