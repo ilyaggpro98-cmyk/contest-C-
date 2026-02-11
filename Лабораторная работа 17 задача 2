@@ -1,0 +1,47 @@
+#include <iostream>
+using namespace std;
+
+struct complex {
+    float re; // действительная часть
+    float im; // мнимая часть
+};
+
+// Функция ввода комплексного числа
+complex input() {
+    complex c;
+    cout << "Введите действительную часть: ";
+    cin >> c.re;
+    cout << "Введите мнимую часть: ";
+    cin >> c.im;
+    return c;
+}
+
+// Функция вывода комплексного числа
+void output(complex c) {
+    cout << c.re;
+    if (c.im >= 0) cout << " + " << c.im << "i";
+    else cout << " - " << -c.im << "i";
+    cout << endl;
+}
+
+// Функция сложения двух комплексных чисел
+complex add(complex a, complex b) {
+    complex result;
+    result.re = a.re + b.re;
+    result.im = a.im + b.im;
+    return result;
+}
+
+int main() {
+    setlocale(LC_ALL,"Russian");
+    cout << "Первое комплексное число:\n";
+    complex a = input();
+
+    cout << "Второе комплексное число:\n";
+    complex b = input();
+
+    complex sum = add(a, b);
+
+    cout << "Сумма: ";
+    output(sum);
+}
