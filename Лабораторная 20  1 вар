@@ -1,4 +1,7 @@
 #include <bits/stdc++.h>
+#ifdef _WIN32
+#include <windows.h>
+#endif
 using namespace std;
 
 struct Student {
@@ -137,7 +140,17 @@ void individualTask(const string &filename, int facultyCode) {
 
 int main()
 {
-    setlocale(LC_ALL,"Russian");
+ #ifdef _WIN32
+    // Переключаем консоль на UTF-8
+    SetConsoleOutputCP(CP_UTF8);
+    SetConsoleCP(CP_UTF8);
+    // Устанавливаем локаль — помогает для корректной работы строковых функций
+    setlocale(LC_ALL, ".UTF8");
+#else
+    setlocale(LC_ALL, "");
+#endif
+
+
     string filename = "students.bin";
     int choice;
     do {
