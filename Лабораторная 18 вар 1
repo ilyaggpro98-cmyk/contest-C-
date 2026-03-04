@@ -11,55 +11,190 @@ struct STUDENT {
 
     // Конструктор по умолчанию
     STUDENT() : recordBookNumber(""), lastName(""), firstName(""),
-                middleName(""), groupNumber(""), averageGrade(0.0f) {
-        cout << "Вызван конструктор по умолчанию STUDENT\n";
-    }
+                middleName(""), groupNumber(""), averageGrade(0.0f) {}
 
-    // Конструктор с параметрами
-    STUDENT(string rb, string ln, string fn, string mn, string gn, float ag)
-        : recordBookNumber(rb), lastName(ln), firstName(fn),
-          middleName(mn), groupNumber(gn), averageGrade(ag) {
-        cout << "Создан студент: " << lastName << " " << firstName << endl;
-    }
-
-    // Деструктор
-    ~STUDENT() {
-        cout << "Удаляется студент: " << lastName << " " << firstName << endl;
-    }
-
+    // Метод для ввода данных одного студента
     void input() {
-        cout << "Введите номер зачетной книжки: ";
+        cout << "Номер зачетной книжки: ";
         cin >> recordBookNumber;
-        cout << "Введите фамилию: ";
+        cout << "Фамилия: ";
         cin >> lastName;
-        cout << "Введите имя: ";
+        cout << "Имя: ";
         cin >> firstName;
-        cout << "Введите отчество: ";
+        cout << "Отчество: ";
         cin >> middleName;
-        cout << "Введите номер группы: ";
+        cout << "Номер группы: ";
         cin >> groupNumber;
-        cout << "Введите средний балл: ";
+        cout << "Средний балл: ";
         cin >> averageGrade;
-    }
-
-    void output() const {
-        cout << "Зачетная книжка: " << recordBookNumber << endl;
-        cout << "ФИО: " << lastName << " " << firstName << " " << middleName << endl;
-        cout << "Группа: " << groupNumber << endl;
-        cout << "Средний балл: " << averageGrade << endl;
     }
 };
 
+// --- ФУНКЦИИ ДЛЯ РАБОТЫ С МАССИВОМ СТУДЕНТОВ ---
+
+// Вывод в виде таблицы
+void printTable(STUDENT* arr, int n) {
+    if (n == 0) {
+        cout << "Список студентов пуст.\n";
+        return;
+    }
+    cout << string(85, '-') << endl;
+    cout << left << setw(15) << "Зачетка" 
+         << setw(15) << "Фамилия" 
+         << setw(15) << "Имя" 
+         << setw(15) << "Отчество" 
+         << setw(10) << "Группа" 
+         << setw(10) << "Ср. балл" << endl;
+    cout << string(85, '-') << endl;
+
+    for (int i = 0; i < n; i++) {
+        cout << left << setw(15) << arr[i].recordBookNumber
+             << setw(15) << arr[i].lastName
+             << setw(15) << arr[i].firstName
+             << setw(15) << arr[i].middleName
+             << setw(10) << arr[i].groupNumber
+             << setw(10) << arr[i].averageGrade << endl;
+    }
+    cout << string(85, '-') << endl;
+}
+
+// Упорядочить по возрастанию номера группы
+void sortByGroup(STUDENT* arr, int n) {
+    sort(arr, arr + n, [](const STUDENT& a, const STUDENT& b) {
+        return a.groupNumber < b.groupNumber;
+    });
+    cout << "Студенты отсортированы по номеру группы.\n";
+}
+
+// Упорядочить по убыванию среднего балла
+void sortByGrade(STUDENT* arr, int n) {
+    sort(arr, arr + n, [](const STUDENT& a, const STUDENT& b) {
+        return a.averageGrade > b.averageGrade;
+    });
+    cout << "Студенты отсортированы по убыванию среднего балла.\n";
+}
+
+// Вывод отличников (балл > 7.0)
+void printGoodStudents(STUDENT* arr, int n) {
+    bool found = false;
+    cout << "Студенты со средним баллом > 7.0:\n";
+    for (int i = 0; i < n; i++) {
+        if (arr[i].averageGrade > 7.0f) {
+            cout << "- " << arr[i].lastName << " (" << arr[i].averageGrade << ")\n";
+            found = true;
+        }
+    }
+    if (!found) {
+        cout << "Таких студентов нет.\n";
+    }
+}
+
+// Поиск по зачетке
+void searchByRecordBook(STUDENT* arr, int n) {
+    string target;
+    cout << "Введите номер зачетной книжки для поиска: ";
+    cin >> target;
+    for (int i = 0; i < n; i++) {
+        if (arr[i].recordBookNumber == target) {
+            cout << "Студент найден:\n";
+            cout << "ФИО: " << arr[i].lastName << " " << arr[i].firstName << " " << arr[i].middleName 
+                 << ", Группа: " << arr[i].groupNumber << ", Ср. балл: " << arr[i].averageGrade << endl;
+            return;
+        }
+    }
+    cout << "Студент с такой зачетной книжкой не найден.\n";
+}
+
+// Редактирование студента по зачетке
+void editStudent(STUDENT* arr, int n) {
+    string target;
+    cout << "Введите номер зачетной книжки для редактирования: ";
+    cin >> target;
+    for (int i = 0; i < n; i++) {
+        if (arr[i].recordBookNumber == target) {
+            cout << "Студент найден. Введите новые данные:\n";
+            arr[i].input();
+            cout << "Данные успешно обновлены!\n";
+            return;
+        }
+    }
+    cout << "Студент с такой зачетной книжкой не найден.\n";
+}
+
 int main() {
-    setlocale(LC_ALL,"Russian");
-    // Создание студента через конструктор с параметрами
-    STUDENT s1("12345", "Иванов", "Иван", "Иванович", "101", 8.2);
-    s1.output();
-    cout << "\nВвод нового студента:\n";
-    STUDENT s2; 
-    s2.input();
-    cout << "\nДанные студента:\n";
-    s2.output();
+    setlocale(LC_ALL, "Russian");
+    
+    STUDENT* students = nullptr; 
+    int n = 0;
+    int choice;
+
+    do {
+        cout << "\n=== МЕНЮ ===\n";
+        cout << "1. Ввести данные о студентах\n";
+        cout << "2. Вывести таблицу студентов\n";
+        cout << "3. Сортировка по возрастанию группы\n";
+        cout << "4. Сортировка по убыванию среднего балла\n";
+        cout << "5. Вывести студентов со средним баллом > 7.0\n";
+        cout << "6. Поиск студента по номеру зачетки\n";
+        cout << "7. Редактировать данные студента\n";
+        cout << "0. Выход\n";
+        cout << "Выберите действие: ";
+        cin >> choice;
+
+        if (choice >= 2 && choice <= 7 && n == 0) {
+            cout << "Ошибка: массив пуст. Сначала выберите пункт 1!\n";
+            continue;
+        }
+
+        switch (choice) {
+            case 1:
+                if (students != nullptr) {
+                    delete[] students; 
+                }
+                cout << "Введите количество студентов: ";
+                cin >> n;
+                if (n <= 0) {
+                    cout << "Количество должно быть положительным!\n";
+                    n = 0;
+                    break;
+                }
+                students = new STUDENT[n]; // Динамическое выделение памяти
+                for (int i = 0; i < n; i++) {
+                    cout << "\nВвод данных для студента #" << i + 1 << ":\n";
+                    students[i].input();
+                }
+                break;
+            case 2:
+                printTable(students, n);
+                break;
+            case 3:
+                sortByGroup(students, n);
+                printTable(students, n);
+                break;
+            case 4:
+                sortByGrade(students, n);
+                printTable(students, n);
+                break;
+            case 5:
+                printGoodStudents(students, n);
+                break;
+            case 6:
+                searchByRecordBook(students, n);
+                break;
+            case 7:
+                editStudent(students, n);
+                break;
+            case 0:
+                cout << "Выход из программы...\n";
+                break;
+            default:
+                cout << "Неверный выбор. Попробуйте снова.\n";
+        }
+    } while (choice != 0);
+
+    if (students != nullptr) {
+        delete[] students;
+    }
 
     return 0;
 }
