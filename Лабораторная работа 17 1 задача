@@ -4,20 +4,20 @@ using namespace std;
 // Цена в рублях и копейках
 struct Price {
     int rubles;
-    int kopecks;
+    unsigned short kopecks;
 };
 
 // Время в часах, минутах, секундах
 struct Time {
     int hours;
-    int minutes;
-    int seconds;
+    unsigned short minutes;
+    unsigned short seconds;
 };
 
 // Дата: число, месяц, год
 struct Date {
-    int day;
-    int month;
+    unsigned short day;
+    unsigned short month;
     int year;
 };
 
@@ -26,8 +26,8 @@ struct Address {
     int postalCode;
     string city;
     string street;
-    int house;
-    int apartment;
+    unsigned short house;
+    unsigned short apartment;
 };
 
 // Информация о студенте
@@ -36,7 +36,7 @@ struct Student {
     string firstName;
     string middleName;
     string recordBookNumber;
-    int grade; // экзаменационная оценка
+    unsigned short grade; // экзаменационная оценка
 };
 
 // Экзаменационная ведомость
