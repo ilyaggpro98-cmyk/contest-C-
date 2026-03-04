@@ -1,0 +1,71 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+int main() {
+    string filename;
+    double a, b;
+
+    cout << "Enter filename: ";
+    cin >> filename;
+    cout << "Enter a and b: ";
+    cin >> a >> b;
+
+    random_device rd;
+    mt19937 gen(rd());
+    uniform_int_distribution<> dist_m(5, 11);
+    uniform_int_distribution<> dist_k(6, 10);
+    uniform_real_distribution<> dist_val(a, b);
+
+    int m = dist_m(gen);
+
+    ofstream outfile(filename);
+    if (!outfile.is_open()) {
+        return 1;
+    }
+
+    outfile << m << "\n";
+    for (int i = 0; i < m; ++i) {
+        int k = dist_k(gen);
+        outfile << k << " ";
+        for (int j = 0; j < k; ++j) {
+            outfile << fixed << setprecision(2) << dist_val(gen) << " ";
+        }
+        outfile << "\n";
+    }
+    outfile.close();
+
+    ifstream infile(filename);
+    if (!infile.is_open()) {
+        return 1;
+    }
+
+    int read_m;
+    infile >> read_m;
+
+    for (int i = 0; i < read_m; ++i) {
+        int k;
+        infile >> k;
+
+        double sum = 0.0;
+        int count = 0;
+
+        for (int j = 0; j < k; ++j) {
+            double val;
+            infile >> val;
+            if (val > 0) {
+                sum += val;
+                count++;
+            }
+        }
+
+        cout << "Row " << i + 1 << ": ";
+        if (count > 0) {
+            cout << sum / count << "\n";
+        } else {
+            cout << 0 << "\n";
+        }
+    }
+    infile.close();
+
+    return 0;
+}
