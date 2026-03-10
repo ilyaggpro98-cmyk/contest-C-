@@ -1,108 +1,193 @@
-#include <bits/stdc++.h>
+#include <iostream>
+#include <string>
+#ifdef _WIN32
+#include <windows.h>
+#endif
+
 using namespace std;
 
 struct Node {
     int data;
     Node* next;
+    Node(int v = 0) : data(v), next(nullptr) {}
 };
 
 struct Queue {
     Node* front;
     Node* rear;
+    Queue() : front(nullptr), rear(nullptr) {}
 };
 
 void init(Queue &q) {
     q.front = q.rear = nullptr;
 }
 
+void clearQueue(Queue &q) {
+    while (q.front) {
+        Node* temp = q.front;
+        q.front = q.front->next;
+        delete temp;
+    }
+    q.rear = nullptr;
+}
+
 void push(Queue &q, int value) {
-    Node* newNode = new Node;
-    newNode->data = value;
-    newNode->next = nullptr;
+    Node* newNode = new Node(value);
     if (q.rear == nullptr) {
         q.front = q.rear = newNode;
     } else {
         q.rear->next = newNode;
         q.rear = newNode;
     }
+    cout << "Элемент " << value << " добавлен в очередь.\n";
 }
 
-void pop(Queue &q) {
-    if (q.front == nullptr) {
-        cout << "Очередь пуста!\n";
-        return;
-    }
+bool pop(Queue &q, int &out) {
+    if (q.front == nullptr) return false;
     Node* temp = q.front;
-    cout << "Удален элемент: " << temp->data << endl;
+    out = temp->data;
     q.front = q.front->next;
+
+    // Если очередь стала пустой, задний указатель тоже нужно обнулить
     if (q.front == nullptr) q.rear = nullptr;
+
     delete temp;
+    return true;
 }
 
-void peek(const Queue &q) {
-    if (q.front == nullptr) {
-        cout << "Очередь пуста!\n";
-        return;
-    }
-    cout << "Первый элемент очереди: " << q.front->data << endl;
+bool peek(const Queue &q, int &out) {
+    if (q.front == nullptr) return false;
+    out = q.front->data;
+    return true;
 }
 
 void queue_List(const Queue &q) {
     if (q.front == nullptr) {
-        cout << "Очередь пуста!\n";
+        cout << "Очередь пуста.\n";
         return;
     }
-    cout << "Элементы очереди: ";
+    cout << "Элементы очереди (от начала к концу): ";
     Node* current = q.front;
     while (current != nullptr) {
-        cout << current->data << " ";
+        cout << current->data;
+        if (current->next) cout << " ";
         current = current->next;
     }
-    cout << endl;
+    cout << '\n';
 }
 
 bool isEmpty(const Queue &q) {
     return q.front == nullptr;
 }
 
+// Безопасный ввод чисел (защита от ввода текста)
+bool readIntLine(const string &prompt, int &out) {
+    cout << prompt;
+    string line;
+    if (!getline(cin, line)) return false;
+    size_t a = line.find_first_not_of(" \t\r\n");
+    if (a == string::npos) return false;
+    size_t b = line.find_last_not_of(" \t\r\n");
+    string t = line.substr(a, b - a + 1);
+    try {
+        size_t pos = 0;
+        long long v = stoll(t, &pos);
+        if (pos != t.size()) return false;
+        out = static_cast<int>(v);
+        return true;
+    } catch (...) {
+        return false;
+    }
+}
+
 int main() {
-    setlocale(LC_ALL, "Russian");
+    #ifdef _WIN32
+    SetConsoleOutputCP(CP_UTF8);
+    SetConsoleCP(CP_UTF8);
+    setlocale(LC_ALL, ".UTF8");
+#else
+    setlocale(LC_ALL, "");
+#endif
+
     Queue q;
     init(q);
 
-    int choice, value;
-    do {
-        cout << "\nМеню:\n";
+    cout << "Демонстрация работы очереди.\n";
+
+    while (true) {
+        bool empty = isEmpty(q);
+
+        // Динамическое формирование меню
+        cout << "\n=== МЕНЮ ===\n";
         cout << "1. Добавить элемент (push)\n";
-        cout << "2. Удалить элемент (pop)\n";
-        cout << "3. Просмотреть первый элемент (peek)\n";
-        cout << "4. Вывести элементы (queue_List)\n";
+        if (!empty) {
+            cout << "2. Удалить элемент (pop)\n";
+            cout << "3. Просмотреть первый элемент (peek)\n";
+            cout << "4. Вывести элементы (queue_List)\n";
+        }
         cout << "5. Проверить пустоту (isEmpty)\n";
+        if (!empty) {
+            cout << "6. Очистить очередь\n";
+        }
         cout << "0. Выход\n";
-        cout << "Ваш выбор: ";
-        cin >> choice;
+
+        int choice;
+        if (!readIntLine("Ваш выбор: ", choice)) {
+            cout << "Неверный ввод. Введите число пункта меню.\n";
+            continue;
+        }
+
+        if (choice == 0) {
+            clearQueue(q);
+            cout << "Выход. Память очищена.\n";
+            break;
+        }
+
+        // Блокируем доступ к скрытым пунктам, если очередь пуста
+        if (empty && (choice == 2 || choice == 3 || choice == 4 || choice == 6)) {
+            cout << "Команда недоступна. Очередь пуста!\n";
+            continue;
+        }
 
         switch (choice) {
-            case 1:
-                cout << "Введите значение: ";
-                cin >> value;
-                push(q, value);
+            case 1: {
+                int val;
+                if (!readIntLine("Введите значение (целое): ", val)) {
+                    cout << "Неверный ввод числа. Операция отменена.\n";
+                } else {
+                    push(q, val);
+                }
                 break;
-            case 2:
-                pop(q);
+            }
+            case 2: {
+                int removed;
+                if (pop(q, removed)) {
+                    cout << "Удален элемент: " << removed << '\n';
+                }
                 break;
-            case 3:
-                peek(q);
+            }
+            case 3: {
+                int firstValue;
+                if (peek(q, firstValue)) {
+                    cout << "Первый элемент очереди: " << firstValue << '\n';
+                }
                 break;
+            }
             case 4:
                 queue_List(q);
                 break;
             case 5:
-                if (isEmpty(q)) cout << "Очередь пуста.\n";
-                else cout << "Очередь не пуста.\n";
+                cout << (isEmpty(q) ? "Очередь пуста.\n" : "Очередь не пуста.\n");
+                break;
+            case 6:
+                clearQueue(q);
+                cout << "Очередь очищена.\n";
+                break;
+            default:
+                cout << "Неверный пункт меню. Пожалуйста, выберите корректный вариант.\n";
                 break;
         }
-    } while (choice != 0);
+    }
 
     return 0;
 }
