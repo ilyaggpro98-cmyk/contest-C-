@@ -1,104 +1,209 @@
+#define _CRT_SECURE_NO_WARNINGS
 #include <iostream>
+#include <string>
+#include <limits>
+
+#ifdef _WIN32
+#include <windows.h>
+#endif
+
 using namespace std;
+
+#define W_IDX   4
+#define W_REC   14
+#define W_LAST  18
+#define W_FIRST 14
+#define W_MID   14
+#define W_GROUP 8
+#define W_GRADE 10
 
 struct Node {
     int data;
     Node* next;
+    Node(int v = 0) : data(v), next(nullptr) {}
 };
-
 
 struct Stack {
     Node* top;
+    Stack() : top(nullptr) {}
 };
 
+void init(Stack &s) { s.top = nullptr; }
 
-void init(Stack &s) {
-    s.top = nullptr;
+void clearStack(Stack &s) {
+    while (s.top) {
+        Node* tmp = s.top;
+        s.top = s.top->next;
+        delete tmp;
+    }
 }
 
 void push(Stack &s, int value) {
-    Node* newNode = new Node;
-    newNode->data = value;
+    Node* newNode = new Node(value);
     newNode->next = s.top;
     s.top = newNode;
+    cout << "Элемент " << value << " добавлен в стек.\n";
 }
 
-void pop(Stack &s) {
-    if (s.top == nullptr) {
-        cout << "Стек пуст!\n";
-        return;
-    }
-    Node* temp = s.top;
-    cout << "Удален элемент: " << temp->data << endl;
+bool pop(Stack &s, int &out) {
+    if (s.top == nullptr) return false;
+    Node* tmp = s.top;
+    out = tmp->data;
     s.top = s.top->next;
-    delete temp;
+    delete tmp;
+    return true;
 }
 
-
-void peek(const Stack &s) {
-    if (s.top == nullptr) {
-        cout << "Стек пуст!\n";
-        return;
-    }
-    cout << "Вершина стека: " << s.top->data << endl;
+bool peek(const Stack &s, int &out) {
+    if (s.top == nullptr) return false;
+    out = s.top->data;
+    return true;
 }
 
 void stack_List(const Stack &s) {
     if (s.top == nullptr) {
-        cout << "Стек пуст!\n";
+        cout << "Стек пуст.\n";
         return;
     }
-    cout << "Элементы стека: ";
+    cout << "Элементы стека (с вершины вниз): ";
     Node* current = s.top;
     while (current != nullptr) {
-        cout << current->data << " ";
+        cout << current->data;
+        if (current->next) cout << " ";
         current = current->next;
     }
-    cout << endl;
+    cout << '\n';
 }
 
-bool isEmpty(const Stack &s) {
-    return s.top == nullptr;
+bool isEmpty(const Stack &s) { return s.top == nullptr; }
+
+bool readIntLine(const string &prompt, int &out) {
+    cout << prompt;
+    string line;
+    if (!getline(cin, line)) return false;
+    size_t a = line.find_first_not_of(" \t\r\n");
+    if (a == string::npos) return false;
+    size_t b = line.find_last_not_of(" \t\r\n");
+    string t = line.substr(a, b - a + 1);
+    try {
+        size_t pos = 0;
+        long long v = stoll(t, &pos);
+        if (pos != t.size()) return false;
+        out = static_cast<int>(v);
+        return true;
+    } catch (...) {
+        return false;
+    }
 }
 
 int main() {
-    setlocale(LC_ALL,"Russian");
+#ifdef _WIN32
+    SetConsoleOutputCP(CP_UTF8);
+    SetConsoleCP(CP_UTF8);
+    setlocale(LC_ALL, ".UTF8");
+#else
+    setlocale(LC_ALL, "");
+#endif
+
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
     Stack s;
     init(s);
 
-    int choice, value;
-    do {
-        cout << "\nМеню:\n";
-        cout << "1. Добавить элемент (push)\n";
-        cout << "2. Удалить элемент (pop)\n";
-        cout << "3. Просмотреть вершину (peek)\n";
-        cout << "4. Вывести элементы (stack_List)\n";
-        cout << "5. Проверить пустоту (isEmpty)\n";
-        cout << "0. Выход\n";
-        cout << "Ваш выбор: ";
-        cin >> choice;
+    cout << "Демонстрация работы стека. Если стек пуст, доступны только: Добавить и Выход.\n";
 
-        switch (choice) {
-            case 1:
-                cout << "Введите значение: ";
-                cin >> value;
-                push(s, value);
+    while (true) {
+        bool empty = isEmpty(s);
+
+        if (empty) {
+            cout << "\n=== МЕНЮ (стек пуст) ===\n";
+            cout << "1. Добавить элемент (push)\n";
+            cout << "0. Выход\n";
+            int choice;
+            if (!readIntLine("Ваш выбор: ", choice)) {
+                cout << "Неверный ввод. Введите 1 или 0.\n";
+                continue;
+            }
+            if (choice == 0) {
+                clearStack(s);
+                cout << "Выход. Память очищена.\n";
                 break;
-            case 2:
-                pop(s);
+            } else if (choice == 1) {
+                int val;
+                if (!readIntLine("Введите значение (целое): ", val)) {
+                    cout << "Неверный ввод числа. Операция отменена.\n";
+                    continue;
+                }
+                push(s, val);
+                continue;
+            } else {
+                cout << "Недопустимый пункт меню. Введите 1 или 0.\n";
+                continue;
+            }
+        } else {
+            cout << "\n=== МЕНЮ (стек НЕ пуст) ===\n";
+            cout << "1. Добавить элемент (push)\n";
+            cout << "2. Удалить элемент (pop)\n";
+            cout << "3. Просмотреть вершину (peek)\n";
+            cout << "4. Вывести элементы (stack_List)\n";
+            cout << "5. Проверить пустоту (isEmpty)\n";
+            cout << "6. Очистить стек\n";
+            cout << "0. Выход\n";
+
+            int choice;
+            if (!readIntLine("Ваш выбор: ", choice)) {
+                cout << "Неверный ввод. Введите число пункта меню.\n";
+                continue;
+            }
+
+            if (choice == 0) {
+                clearStack(s);
+                cout << "Выход. Память очищена.\n";
                 break;
-            case 3:
-                peek(s);
-                break;
-            case 4:
-                stack_List(s);
-                break;
-            case 5:
-                if (isEmpty(s)) cout << "Стек пуст.\n";
-                else cout << "Стек не пуст.\n";
-                break;
+            }
+
+            switch (choice) {
+                case 1: {
+                    int val;
+                    if (!readIntLine("Введите значение (целое): ", val)) {
+                        cout << "Неверный ввод числа. Операция отменена.\n";
+                    } else {
+                        push(s, val);
+                    }
+                    break;
+                }
+                case 2: {
+                    int removed;
+                    if (pop(s, removed)) {
+                        cout << "Удален элемент: " << removed << '\n';
+                    } else {
+                        cout << "Стек пуст! Нечего удалять.\n";
+                    }
+                    break;
+                }
+                case 3: {
+                    int topv;
+                    if (peek(s, topv)) cout << "Вершина стека: " << topv << '\n';
+                    else cout << "Стек пуст.\n";
+                    break;
+                }
+                case 4:
+                    stack_List(s);
+                    break;
+                case 5:
+                    cout << (isEmpty(s) ? "Стек пуст.\n" : "Стек не пуст.\n");
+                    break;
+                case 6:
+                    clearStack(s);
+                    cout << "Стек очищен.\n";
+                    break;
+                default:
+                    cout << "Неверный пункт меню. Пожалуйста, выберите корректный вариант.\n";
+                    break;
+            }
         }
-    } while (choice != 0);
+    }
 
     return 0;
 }
