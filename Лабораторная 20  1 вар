@@ -15,176 +15,337 @@ struct Student {
     double averageMark;
 };
 
-void createFile(const string &filename) {
-    ofstream fout(filename, ios::binary);
-    if (!fout) {
-        cerr << "Ошибка создания файла\n";
-        return;
+// ширины колонок
+const int W_IDX   = 4;
+const int W_REC   = 14;
+const int W_LAST  = 18;
+const int W_FIRST = 14;
+const int W_MID   = 14;
+const int W_GROUP = 8;
+const int W_GRADE = 10;
+
+static int totalWidth() {
+    return W_IDX + 3 + W_REC + 3 + W_LAST + 3 + W_FIRST + 3 + W_MID + 3 + W_GROUP + 3 + W_GRADE;
+}
+
+string fit(const string &s, int width) {
+    if ((int)s.size() <= width) return s;
+    if (width <= 1) return s.substr(0, width);
+    return s.substr(0, width - 1) + "…";
+}
+
+string toStr(const char *cstr) {
+    if (!cstr) return "";
+    string s(cstr);
+    size_t pos = s.find('\0');
+    if (pos != string::npos) s.resize(pos);
+    while (!s.empty() && isspace((unsigned char)s.back())) s.pop_back();
+    size_t i = 0;
+    while (i < s.size() && isspace((unsigned char)s[i])) ++i;
+    if (i) s = s.substr(i);
+    return s;
+}
+
+void printHeader() {
+    cout << string(totalWidth(), '-') << '\n';
+    cout << left
+         << setw(W_IDX)   << "#"
+         << " | " << setw(W_REC + 7)   << "Фамилия"
+         << " | " << setw(W_LAST + 7)  << "Имя"
+         << " | " << setw(W_FIRST + 3) << "Отчество"
+         << " | " << setw(W_MID + 8)   << "Возраст"
+         << " | " << setw(W_GROUP + 6) << "Факультет"
+         << " | " << setw(W_GRADE) << "Курс/Группа/Сред."
+         << '\n';
+    cout << string(totalWidth(), '-') << '\n';
+}
+
+void printStudentRow(const Student &st, int idx) {
+    string sur = fit(toStr(st.surname), W_REC);
+    string name = fit(toStr(st.name), W_LAST);
+    string patro = fit(toStr(st.patronymic), W_FIRST);
+    ostringstream cg;
+    cg << st.course << "/" << st.group << "/" << fixed << setprecision(2) << st.averageMark;
+    string cgStr = fit(cg.str(), W_GRADE);
+    cout << left << setw(W_IDX) << idx
+         << " | " << setw(W_REC + 7) << sur
+         << " | " << setw(W_LAST + 7) << name
+         << " | " << setw(W_FIRST + 3) << patro
+         << " | " << right << setw(W_MID + 8) << st.age
+         << " | " << setw(W_GROUP + 6) << st.facultyCode
+         << " | " << right << setw(W_GRADE) << cgStr
+         << left << '\n';
+}
+
+bool fileExists(const string &filename) {
+    ifstream f(filename, ios::binary);
+    return f.good();
+}
+
+size_t countRecords(const string &filename) {
+    ifstream fin(filename, ios::binary | ios::ate);
+    if (!fin) return 0;
+    auto bytes = fin.tellg();
+    if (bytes < 0) return 0;
+    return static_cast<size_t>(bytes) / sizeof(Student);
+}
+
+void readLineToChar(const string &prompt, char *dest, size_t destSize) {
+    cout << prompt;
+    string s;
+    getline(cin >> ws, s);
+    strncpy(dest, s.c_str(), destSize - 1);
+    dest[destSize - 1] = '\0';
+}
+
+int readInt(const string &prompt) {
+    while (true) {
+        cout << prompt;
+        string s;
+        if (!getline(cin >> ws, s)) continue;
+        try {
+            int x = stoi(s);
+            return x;
+        } catch (...) {
+            cout << "Неверный ввод. Попробуйте целое число.\n";
+        }
     }
-    int n;
-    cout << "Введите количество студентов: ";
-    cin >> n;
+}
+
+double readDouble(const string &prompt) {
+    while (true) {
+        cout << prompt;
+        string s;
+        if (!getline(cin >> ws, s)) continue;
+        for (char &c : s) if (c == ',') c = '.';
+        try {
+            double x = stod(s);
+            return x;
+        } catch (...) {
+            cout << "Неверный ввод. Попробуйте число (например 7.5).\n";
+        }
+    }
+}
+
+void createFile(const string &filename) {
+    ofstream fout(filename, ios::binary | ios::trunc);
+    if (!fout) { cerr << "Ошибка создания файла\n"; return; }
+    int n = readInt("Введите количество студентов: ");
     Student st;
-    for (int i = 0; i < n; i++) {
-        cout << "Студент " << i+1 << ":\n";
-        cout << "Фамилия: "; cin >> st.surname;
-        cout << "Имя: "; cin >> st.name;
-        cout << "Отчество: "; cin >> st.patronymic;
-        cout << "Возраст: "; cin >> st.age;
-        cout << "Код факультета: "; cin >> st.facultyCode;
-        cout << "Курс: "; cin >> st.course;
-        cout << "Группа: "; cin >> st.group;
-        cout << "Средний балл: "; cin >> st.averageMark;
+    for (int i = 0; i < n; ++i) {
+        cout << "\nСтудент " << i + 1 << ":\n";
+        readLineToChar("Фамилия: ", st.surname, sizeof(st.surname));
+        readLineToChar("Имя: ", st.name, sizeof(st.name));
+        readLineToChar("Отчество: ", st.patronymic, sizeof(st.patronymic));
+        st.age = readInt("Возраст (полных лет): ");
+        st.facultyCode = readInt("Код факультета: ");
+        st.course = readInt("Курс: ");
+        st.group = readInt("Номер группы: ");
+        st.averageMark = readDouble("Средний балл: ");
         fout.write(reinterpret_cast<char*>(&st), sizeof(Student));
     }
     fout.close();
+    cout << "Файл создан и заполнен.\n";
 }
 
 void viewFile(const string &filename) {
+    if (!fileExists(filename)) { cout << "Файл не найден.\n"; return; }
+    size_t total = countRecords(filename);
+    if (total == 0) { cout << "Файл пуст.\n"; return; }
     ifstream fin(filename, ios::binary);
-    if (!fin) {
-        cerr << "Ошибка открытия файла\n";
-        return;
-    }
+    if (!fin) { cerr << "Ошибка открытия файла\n"; return; }
+    printHeader();
     Student st;
-    int i = 0;
-    cout << left << setw(15) << "Фамилия"
-         << setw(15) << "Имя"
-         << setw(15) << "Отчество"
-         << setw(5) << "Возраст"
-         << setw(10) << "Факультет"
-         << setw(5) << "Курс"
-         << setw(8) << "Группа"
-         << setw(10) << "Сред.балл" << endl;
+    int idx = 1;
     while (fin.read(reinterpret_cast<char*>(&st), sizeof(Student))) {
-        cout << setw(15) << st.surname
-             << setw(15) << st.name
-             << setw(15) << st.patronymic
-             << setw(5) << st.age
-             << setw(10) << st.facultyCode
-             << setw(5) << st.course
-             << setw(8) << st.group
-             << setw(10) << st.averageMark << endl;
-        i++;
+        printStudentRow(st, idx++);
     }
+    cout << string(totalWidth(), '-') << '\n';
     fin.close();
 }
 
 void addRecord(const string &filename) {
     ofstream fout(filename, ios::binary | ios::app);
+    if (!fout) { cerr << "Ошибка открытия файла для добавления\n"; return; }
     Student st;
     cout << "Введите данные нового студента:\n";
-    cout << "Фамилия: "; cin >> st.surname;
-    cout << "Имя: "; cin >> st.name;
-    cout << "Отчество: "; cin >> st.patronymic;
-    cout << "Возраст: "; cin >> st.age;
-    cout << "Код факультета: "; cin >> st.facultyCode;
-    cout << "Курс: "; cin >> st.course;
-    cout << "Группа: "; cin >> st.group;
-    cout << "Средний балл: "; cin >> st.averageMark;
+    readLineToChar("Фамилия: ", st.surname, sizeof(st.surname));
+    readLineToChar("Имя: ", st.name, sizeof(st.name));
+    readLineToChar("Отчество: ", st.patronymic, sizeof(st.patronymic));
+    st.age = readInt("Возраст (полных лет): ");
+    st.facultyCode = readInt("Код факультета: ");
+    st.course = readInt("Курс: ");
+    st.group = readInt("Номер группы: ");
+    st.averageMark = readDouble("Средний балл: ");
     fout.write(reinterpret_cast<char*>(&st), sizeof(Student));
     fout.close();
+    cout << "Запись добавлена.\n";
 }
 
 void deleteRecord(const string &filename, int recordNum) {
+    size_t total = countRecords(filename);
+    if (total == 0) { cout << "Файл пуст или не найден.\n"; return; }
+    if (recordNum < 1 || static_cast<size_t>(recordNum) > total) {
+        cout << "Неверный номер записи. Доступны 1.." << total << '\n'; return;
+    }
     ifstream fin(filename, ios::binary);
-    ofstream fout("temp.bin", ios::binary);
+    ofstream fout("temp.bin", ios::binary | ios::trunc);
     Student st;
-    int i = 0;
+    int idx = 1;
     while (fin.read(reinterpret_cast<char*>(&st), sizeof(Student))) {
-        if (i != recordNum) {
-            fout.write(reinterpret_cast<char*>(&st), sizeof(Student));
-        }
-        i++;
+        if (idx != recordNum) fout.write(reinterpret_cast<char*>(&st), sizeof(Student));
+        ++idx;
     }
     fin.close();
     fout.close();
-    remove(filename.c_str());
-    rename("temp.bin", filename.c_str());
+    if (remove(filename.c_str()) != 0 || rename("temp.bin", filename.c_str()) != 0) {
+        cerr << "Ошибка при замене файлов.\n";
+    } else {
+        cout << "Запись №" << recordNum << " удалена.\n";
+    }
 }
 
 void editRecord(const string &filename, int recordNum) {
-    fstream file(filename, ios::binary | ios::in | ios::out);
-    Student st;
-    file.seekg(recordNum * sizeof(Student), ios::beg);
-    if (!file.read(reinterpret_cast<char*>(&st), sizeof(Student))) {
-        cerr << "Запись не найдена\n";
-        return;
+    size_t total = countRecords(filename);
+    if (total == 0) { cout << "Файл пуст или не найден.\n"; return; }
+    if (recordNum < 1 || static_cast<size_t>(recordNum) > total) {
+        cout << "Неверный номер записи. Доступны 1.." << total << '\n'; return;
     }
+    vector<Student> v;
+    ifstream fin(filename, ios::binary);
+    Student st;
+    while (fin.read(reinterpret_cast<char*>(&st), sizeof(Student))) v.push_back(st);
+    fin.close();
+    cout << "Текущая запись:\n";
+    printHeader();
+    printStudentRow(v[recordNum - 1], recordNum);
+    cout << string(totalWidth(), '-') << '\n';
     cout << "Введите новые данные:\n";
-    cout << "Фамилия: "; cin >> st.surname;
-    cout << "Имя: "; cin >> st.name;
-    cout << "Отчество: "; cin >> st.patronymic;
-    cout << "Возраст: "; cin >> st.age;
-    cout << "Код факультета: "; cin >> st.facultyCode;
-    cout << "Курс: "; cin >> st.course;
-    cout << "Группа: "; cin >> st.group;
-    cout << "Средний балл: "; cin >> st.averageMark;
-    file.seekp(recordNum * sizeof(Student), ios::beg);
-    file.write(reinterpret_cast<char*>(&st), sizeof(Student));
-    file.close();
+    readLineToChar("Фамилия: ", v[recordNum - 1].surname, sizeof(v[recordNum - 1].surname));
+    readLineToChar("Имя: ", v[recordNum - 1].name, sizeof(v[recordNum - 1].name));
+    readLineToChar("Отчество: ", v[recordNum - 1].patronymic, sizeof(v[recordNum - 1].patronymic));
+    v[recordNum - 1].age = readInt("Возраст (полных лет): ");
+    v[recordNum - 1].facultyCode = readInt("Код факультета: ");
+    v[recordNum - 1].course = readInt("Курс: ");
+    v[recordNum - 1].group = readInt("Номер группы: ");
+    v[recordNum - 1].averageMark = readDouble("Средний балл: ");
+    ofstream fout(filename, ios::binary | ios::trunc);
+    for (const auto &s : v) fout.write(reinterpret_cast<const char*>(&s), sizeof(Student));
+    fout.close();
+    cout << "Запись обновлена.\n";
 }
 
 void individualTask(const string &filename, int facultyCode) {
+    if (!fileExists(filename)) { cout << "Файл не найден.\n"; return; }
     ifstream fin(filename, ios::binary);
-    ofstream fout("FIO.txt");
+    ofstream fout("FIO.txt", ios::trunc);
     Student st;
+    int count = 0;
     while (fin.read(reinterpret_cast<char*>(&st), sizeof(Student))) {
         if (st.facultyCode == facultyCode) {
-            fout << st.surname << " " << st.name << " " << st.patronymic << "\n";
+            fout << toStr(st.surname) << " " << toStr(st.name) << " " << toStr(st.patronymic) << '\n';
+            ++count;
         }
     }
     fin.close();
     fout.close();
+    cout << "Файл FIO.txt сформирован. Найдено студентов: " << count << '\n';
 }
 
-int main()
-{
- #ifdef _WIN32
-    // Переключаем консоль на UTF-8
+void submenu_table(const string &filename) {
+    bool modified = false;
+    while (true) {
+        cout << "\n--- МЕНЮ ТАБЛИЦЫ ---\n";
+        cout << "1. Просмотреть файл (таблица)\n";
+        cout << "2. Добавить запись\n";
+        cout << "3. Удалить запись (по номеру)\n";
+        cout << "4. Редактировать запись (по номеру)\n";
+        cout << "5. Индивидуальное задание (формирование FIO.txt по коду факультета)\n";
+        cout << "0. Вернуться в главное меню\n";
+        int ch = readInt("Выберите действие: ");
+        if (ch == 0) {
+            if (modified) {
+                cout << "Сохранить изменения? (1=Да/0=Нет): ";
+                int q; cin >> q;
+                if (q == 1) cout << "Данные уже сохраняются немедленно в этом варианте (нет кэша).\n";
+            }
+            break;
+        }
+        switch (ch) {
+            case 1: viewFile(filename); break;
+            case 2: addRecord(filename); modified = true; break;
+            case 3: {
+                size_t total = countRecords(filename);
+                if (total == 0) { cout << "Файл пуст.\n"; break; }
+                cout << "Всего записей: " << total << '\n';
+                int num = readInt("Номер записи для удаления (1..): ");
+                deleteRecord(filename, num);
+                modified = true;
+                break;
+            }
+            case 4: {
+                size_t total = countRecords(filename);
+                if (total == 0) { cout << "Файл пуст.\n"; break; }
+                cout << "Всего записей: " << total << '\n';
+                int num = readInt("Номер записи для редактирования (1..): ");
+                editRecord(filename, num);
+                modified = true;
+                break;
+            }
+            case 5: {
+                int code = readInt("Введите код факультета: ");
+                individualTask(filename, code);
+                break;
+            }
+            default: cout << "Неверный выбор.\n";
+        }
+    }
+}
+
+int main() {
+#ifdef _WIN32
     SetConsoleOutputCP(CP_UTF8);
     SetConsoleCP(CP_UTF8);
-    // Устанавливаем локаль — помогает для корректной работы строковых функций
     setlocale(LC_ALL, ".UTF8");
 #else
     setlocale(LC_ALL, "");
 #endif
 
+    const string filename = "students.bin";
 
-    string filename = "students.bin";
-    int choice;
-    do {
-        cout << "\nМеню:\n"
-             << "1. Создать файл\n"
-             << "2. Просмотреть файл\n"
-             << "3. Добавить запись\n"
-             << "4. Удалить запись\n"
-             << "5. Редактировать запись\n"
-             << "6. Индивидуальное задание\n"
-             << "0. Выход\n"
-             << "Ваш выбор: ";
-        cin >> choice;
-        switch (choice) {
-            case 1: createFile(filename); break;
-            case 2: viewFile(filename); break;
-            case 3: addRecord(filename); break;
-            case 4: {
-                int num; cout << "Номер записи для удаления: "; cin >> num;
-                deleteRecord(filename, num);
-                break;
+    while (true) {
+        bool exists = fileExists(filename);
+        cout << "\n=== ГЛАВНОЕ МЕНЮ ===\n";
+        cout << (exists ? "Файл '" : "Файл '") << filename << (exists ? "' есть на диске.\n" : "' не найден.\n");
+        cout << "1. Создать/Открыть файл (тип 1 — students.bin)\n";
+        cout << "0. Выход\n";
+        int mainChoice = readInt("Выберите действие: ");
+        if (mainChoice == 0) break;
+        if (mainChoice == 1) {
+            if (exists) {
+                cout << "Файл существует. 1 - Открыть текущий, 2 - Пересоздать (удалить и создать новый): ";
+                int sub; cin >> sub;
+                if (sub == 1) {
+                    submenu_table(filename);
+                } else if (sub == 2) {
+                    createFile(filename);
+                    submenu_table(filename);
+                } else {
+                    cout << "Отмена.\n";
+                }
+            } else {
+                cout << "Файл не найден. Создать новый? (1=Да / 0=Нет): ";
+                int q; cin >> q;
+                if (q == 1) {
+                    createFile(filename);
+                    submenu_table(filename);
+                } else cout << "Возврат в главное меню.\n";
             }
-            case 5: {
-                int num; cout << "Номер записи для редактирования: "; cin >> num;
-                editRecord(filename, num);
-                break;
-            }
-            case 6: {
-                int code; cout << "Введите код факультета: "; cin >> code;
-                individualTask(filename, code);
-                cout << "Файл FIO.txt сформирован.\n";
-                break;
-            }
+        } else {
+            cout << "В главном меню доступны только 1 и 0.\n";
         }
-    } while (choice != 0);
+    }
+
+    cout << "Программа завершена.\n";
     return 0;
 }
