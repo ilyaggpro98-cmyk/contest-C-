@@ -1,200 +1,430 @@
 #include <bits/stdc++.h>
+#ifdef _WIN32
+#include <windows.h>
+#endif
 using namespace std;
 
 struct STUDENT {
-    string recordBookNumber; // номер зачетной книжки
-    string lastName;         // фамилия
-    string firstName;        // имя
-    string middleName;       // отчество
-    string groupNumber;      // номер группы
-    float averageGrade;      // средний балл
-
-    // Конструктор по умолчанию
+    string recordBookNumber;
+    string lastName;
+    string firstName;
+    string middleName;
+    string groupNumber;
+    float averageGrade;
     STUDENT() : recordBookNumber(""), lastName(""), firstName(""),
                 middleName(""), groupNumber(""), averageGrade(0.0f) {}
 
-    // Метод для ввода данных одного студента
     void input() {
-        cout << "Номер зачетной книжки: ";
-        cin >> recordBookNumber;
-        cout << "Фамилия: ";
-        cin >> lastName;
-        cout << "Имя: ";
-        cin >> firstName;
-        cout << "Отчество: ";
-        cin >> middleName;
-        cout << "Номер группы: ";
-        cin >> groupNumber;
+        // используем getline, чтобы допустить пробелы в именах
+        cout << "Номер зачетной книжки: ";      getline(cin >> ws, recordBookNumber);
+        cout << "Фамилия: ";                   getline(cin >> ws, lastName);
+        cout << "Имя: ";                       getline(cin >> ws, firstName);
+        cout << "Отчество: ";                  getline(cin >> ws, middleName);
+        cout << "Номер группы: ";              getline(cin >> ws, groupNumber);
+
+        // читаем средний балл как строку, чтобы корректно обработать запятую
+        string s;
         cout << "Средний балл: ";
-        cin >> averageGrade;
+        while (true) {
+            if (!getline(cin, s)) s = "";
+            if (s.empty()) { cout << "Пустой ввод. Введите средний балл: "; continue; }
+            // заменить запятую на точку
+            for (char &c : s) if (c == ',') c = '.';
+            try {
+                averageGrade = stof(s);
+                break;
+            } catch (...) {
+                cout << "Неверный формат. Введите число (например 7.5): ";
+            }
+        }
     }
 };
 
-// --- ФУНКЦИИ ДЛЯ РАБОТЫ С МАССИВОМ СТУДЕНТОВ ---
+const string FILENAME = "students.txt";
 
-// Вывод в виде таблицы
-void printTable(STUDENT* arr, int n) {
-    if (n == 0) {
-        cout << "Список студентов пуст.\n";
-        return;
-    }
-    cout << string(85, '-') << endl;
-    cout << left << setw(15) << "Зачетка" 
-         << setw(15) << "Фамилия" 
-         << setw(15) << "Имя" 
-         << setw(15) << "Отчество" 
-         << setw(10) << "Группа" 
-         << setw(10) << "Ср. балл" << endl;
-    cout << string(85, '-') << endl;
+// ширины колонок (подберите по желанию)
+const int W_IDX   = 4;
+const int W_REC   = 14;
+const int W_LAST  = 18;
+const int W_FIRST = 14;
+const int W_MID   = 14;
+const int W_GROUP = 8;
+const int W_GRADE = 10;
 
-    for (int i = 0; i < n; i++) {
-        cout << left << setw(15) << arr[i].recordBookNumber
-             << setw(15) << arr[i].lastName
-             << setw(15) << arr[i].firstName
-             << setw(15) << arr[i].middleName
-             << setw(10) << arr[i].groupNumber
-             << setw(10) << arr[i].averageGrade << endl;
-    }
-    cout << string(85, '-') << endl;
+static int totalWidth() {
+    // учитываем разделители " | "
+    return W_IDX + 3 + W_REC + 3 + W_LAST + 3 + W_FIRST + 3 + W_MID + 3 + W_GROUP + 3 + W_GRADE;
 }
 
-// Упорядочить по возрастанию номера группы
+string fit(const string &s, int width) {
+    if ((int)s.size() <= width) return s;
+    if (width <= 1) return s.substr(0, width);
+    // обрезаем и заменяем последний символ на '…'
+    return s.substr(0, width-1) + "…";
+}
+
+void printHeader() {
+    cout << string(totalWidth(), '-') << '\n';
+    cout << left
+         << setw(W_IDX)   << "#"
+         << " | " << setw(W_REC + 7)   << "Зачетка"
+         << " | " << setw(W_LAST + 7)  << "Фамилия"
+         << " | " << setw(W_FIRST + 3) << "Имя"
+         << " | " << setw(W_MID + 8)   << "Отчество"
+         << " | " << setw(W_GROUP + 6) << "Группа"
+         << " | " << setw(W_GRADE) << "Ср. балл"
+         << '\n';
+    cout << string(totalWidth(), '-') << '\n';
+}
+
+void printStudentRow(const STUDENT& s, int idx) {
+    cout << left << setw(W_IDX) << idx
+         << " | " << setw(W_REC)   << fit(s.recordBookNumber, W_REC)
+         << " | " << setw(W_LAST)  << fit(s.lastName, W_LAST)
+         << " | " << setw(W_FIRST) << fit(s.firstName, W_FIRST)
+         << " | " << setw(W_MID)   << fit(s.middleName, W_MID)
+         << " | " << setw(W_GROUP) << fit(s.groupNumber, W_GROUP)
+         << " | " << right << setw(W_GRADE-1) << fixed << setprecision(2) << s.averageGrade
+         << left << '\n';
+}
+
+void printTable(STUDENT* arr, int n) {
+    if (n == 0) { cout << "Список студентов пуст.\n"; return; }
+    printHeader();
+    for (int i = 0; i < n; ++i) printStudentRow(arr[i], i+1);
+    cout << string(totalWidth(), '-') << '\n';
+}
+
 void sortByGroup(STUDENT* arr, int n) {
-    sort(arr, arr + n, [](const STUDENT& a, const STUDENT& b) {
+    sort(arr, arr + n, [](const STUDENT& a, const STUDENT& b){
         return a.groupNumber < b.groupNumber;
     });
     cout << "Студенты отсортированы по номеру группы.\n";
 }
 
-// Упорядочить по убыванию среднего балла
 void sortByGrade(STUDENT* arr, int n) {
-    sort(arr, arr + n, [](const STUDENT& a, const STUDENT& b) {
+    sort(arr, arr + n, [](const STUDENT& a, const STUDENT& b){
         return a.averageGrade > b.averageGrade;
     });
     cout << "Студенты отсортированы по убыванию среднего балла.\n";
 }
 
-// Вывод отличников (балл > 7.0)
 void printGoodStudents(STUDENT* arr, int n) {
     bool found = false;
-    cout << "Студенты со средним баллом > 7.0:\n";
-    for (int i = 0; i < n; i++) {
+    for (int i = 0; i < n; ++i) {
         if (arr[i].averageGrade > 7.0f) {
-            cout << "- " << arr[i].lastName << " (" << arr[i].averageGrade << ")\n";
+            if (!found) {
+                cout << '\n' << left << setw(W_LAST) << "Фамилия" << " | " << setw(8) << "Ср. балл" << '\n';
+                cout << string(W_LAST + 11, '-') << '\n';
+            }
+            cout << left << setw(W_LAST) << fit(arr[i].lastName, W_LAST)
+                 << " | " << right << setw(8) << fixed << setprecision(2) << arr[i].averageGrade << '\n';
             found = true;
         }
     }
-    if (!found) {
-        cout << "Таких студентов нет.\n";
-    }
+    if (!found) cout << "Таких студентов нет.\n";
 }
 
-// Поиск по зачетке
+int findByRecord(STUDENT* arr, int n, const string& target) {
+    for (int i = 0; i < n; ++i) if (arr[i].recordBookNumber == target) return i;
+    return -1;
+}
+
 void searchByRecordBook(STUDENT* arr, int n) {
     string target;
     cout << "Введите номер зачетной книжки для поиска: ";
-    cin >> target;
-    for (int i = 0; i < n; i++) {
-        if (arr[i].recordBookNumber == target) {
-            cout << "Студент найден:\n";
-            cout << "ФИО: " << arr[i].lastName << " " << arr[i].firstName << " " << arr[i].middleName 
-                 << ", Группа: " << arr[i].groupNumber << ", Ср. балл: " << arr[i].averageGrade << endl;
-            return;
-        }
+    getline(cin >> ws, target);
+    int idx = findByRecord(arr, n, target);
+    if (idx >= 0) {
+        cout << "Студент найден:\n";
+        printHeader();
+        printStudentRow(arr[idx], idx+1);
+        cout << string(totalWidth(), '-') << '\n';
+    } else {
+        cout << "Студент с такой зачетной книжкой не найден.\n";
     }
-    cout << "Студент с такой зачетной книжкой не найден.\n";
 }
 
-// Редактирование студента по зачетке
 void editStudent(STUDENT* arr, int n) {
     string target;
     cout << "Введите номер зачетной книжки для редактирования: ";
-    cin >> target;
-    for (int i = 0; i < n; i++) {
-        if (arr[i].recordBookNumber == target) {
-            cout << "Студент найден. Введите новые данные:\n";
-            arr[i].input();
-            cout << "Данные успешно обновлены!\n";
-            return;
-        }
+    getline(cin >> ws, target);
+    int idx = findByRecord(arr, n, target);
+    if (idx >= 0) {
+        cout << "Найдена запись. Введите новые данные (вся запись заменится):\n";
+        arr[idx].input();
+        cout << "Данные обновлены.\n";
+    } else {
+        cout << "Студент с такой зачетной книжкой не найден.\n";
     }
-    cout << "Студент с такой зачетной книжкой не найден.\n";
 }
 
-int main() {
-    setlocale(LC_ALL, "Russian");
-    
-    STUDENT* students = nullptr; 
-    int n = 0;
-    int choice;
+bool saveToFile(STUDENT* arr, int n) {
+    ofstream fout(FILENAME);
+    if (!fout) { cerr << "Ошибка при открытии файла для записи.\n"; return false; }
+    for (int i = 0; i < n; ++i) {
+        // поля разделены '|' — не используйте '|' в вводе
+        fout << arr[i].recordBookNumber << '|'
+             << arr[i].lastName << '|'
+             << arr[i].firstName << '|'
+             << arr[i].middleName << '|'
+             << arr[i].groupNumber << '|'
+             << fixed << setprecision(2) << arr[i].averageGrade << '\n';
+    }
+    return true;
+}
 
-    do {
-        cout << "\n=== МЕНЮ ===\n";
-        cout << "1. Ввести данные о студентах\n";
+bool loadFromFile(STUDENT*& arr, int& n) {
+    ifstream fin(FILENAME);
+    if (!fin) return false;
+    vector<STUDENT> tmp;
+    string line;
+    while (getline(fin, line)) {
+        if (line.empty()) continue;
+        STUDENT s;
+        vector<string> parts;
+        string cur;
+        stringstream ss(line);
+        while (getline(ss, cur, '|')) parts.push_back(cur);
+        if (parts.size() != 6) continue; // игнорируем некорректные строки
+        s.recordBookNumber = parts[0];
+        s.lastName = parts[1];
+        s.firstName = parts[2];
+        s.middleName = parts[3];
+        s.groupNumber = parts[4];
+        try { s.averageGrade = stof(parts[5]); } catch(...) { s.averageGrade = 0.0f; }
+        tmp.push_back(s);
+    }
+    fin.close();
+    if (arr != nullptr) { delete[] arr; arr = nullptr; n = 0; }
+    n = (int)tmp.size();
+    if (n == 0) { arr = nullptr; return true; }
+    arr = new STUDENT[n];
+    for (int i = 0; i < n; ++i) arr[i] = tmp[i];
+    return true;
+}
+
+STUDENT* appendStudents(STUDENT* arr, int& n, int addCount) {
+    if (addCount <= 0) return arr;
+    STUDENT* newArr = new STUDENT[n + addCount];
+    for (int i = 0; i < n; ++i) newArr[i] = arr[i];
+    for (int i = 0; i < addCount; ++i) {
+        cout << "\nВвод данных для студента #" << (n + i + 1) << ":\n";
+        newArr[n + i].input();
+    }
+    delete[] arr;
+    n += addCount;
+    return newArr;
+}
+
+void submenu_table(STUDENT*& students, int& n, bool& modified) {
+    int choice = -1;
+    while (true) {
+        cout << "\n--- МЕНЮ ТАБЛИЦЫ ---\n";
+        cout << "1. Ввести данные о студентах (создать новый / добавить)\n";
         cout << "2. Вывести таблицу студентов\n";
         cout << "3. Сортировка по возрастанию группы\n";
         cout << "4. Сортировка по убыванию среднего балла\n";
         cout << "5. Вывести студентов со средним баллом > 7.0\n";
         cout << "6. Поиск студента по номеру зачетки\n";
         cout << "7. Редактировать данные студента\n";
-        cout << "0. Выход\n";
+        cout << "8. Сохранить в файл (" << FILENAME << ")\n";
+        cout << "9. Загрузить из файла (" << FILENAME << ") (перезапишет текущий список)\n";
+        cout << "0. Вернуться в главное меню\n";
         cout << "Выберите действие: ";
-        cin >> choice;
-
-        if (choice >= 2 && choice <= 7 && n == 0) {
-            cout << "Ошибка: массив пуст. Сначала выберите пункт 1!\n";
+        if (!(cin >> choice)) {
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            cout << "Неверный ввод. Попробуйте снова.\n";
             continue;
         }
-
+        if (choice == 0) {
+            if (modified) {
+                cout << "Произведены изменения. Сохранить перед выходом из таблицы? (1=Да / 0=Нет): ";
+                int q; cin >> q;
+                if (q == 1) {
+                    if (saveToFile(students, n)) {
+                        cout << "Сохранено в файл.\n";
+                        modified = false;
+                    } else cout << "Ошибка сохранения.\n";
+                }
+            }
+            break;
+        }
+        if ((choice >= 2 && choice <= 7) && n == 0) {
+            cout << "Ошибка: список студентов пуст. Сначала введите или загрузите данные (пункты 1 или 9)!\n";
+            continue;
+        }
         switch (choice) {
-            case 1:
-                if (students != nullptr) {
-                    delete[] students; 
-                }
-                cout << "Введите количество студентов: ";
-                cin >> n;
-                if (n <= 0) {
-                    cout << "Количество должно быть положительным!\n";
-                    n = 0;
-                    break;
-                }
-                students = new STUDENT[n]; // Динамическое выделение памяти
-                for (int i = 0; i < n; i++) {
-                    cout << "\nВвод данных для студента #" << i + 1 << ":\n";
-                    students[i].input();
+            case 1: {
+                cout << "1 - Создать новый список (перезаписать), 2 - Добавить к текущему: ";
+                int sub; cin >> sub;
+                if (sub == 1) {
+                    if (students != nullptr) { delete[] students; students = nullptr; n = 0; }
+                    cout << "Введите количество студентов: ";
+                    int newN; cin >> newN;
+                    if (newN <= 0) { cout << "Количество должно быть > 0!\n"; break; }
+                    students = new STUDENT[newN];
+                    // consume newline before using getline inside input
+                    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                    for (int i = 0; i < newN; ++i) {
+                        cout << "\nВвод данных для студента #" << i + 1 << ":\n";
+                        students[i].input();
+                    }
+                    n = newN;
+                    modified = true;
+                } else if (sub == 2) {
+                    cout << "Сколько добавить студентов? ";
+                    int add; cin >> add;
+                    if (add <= 0) { cout << "Количество должно быть > 0!\n"; break; }
+                    // consume newline
+                    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                    students = appendStudents(students, n, add);
+                    modified = true;
+                } else {
+                    cout << "Неверный выбор.\n";
                 }
                 break;
+            }
             case 2:
                 printTable(students, n);
                 break;
             case 3:
                 sortByGroup(students, n);
                 printTable(students, n);
+                modified = true;
                 break;
             case 4:
                 sortByGrade(students, n);
                 printTable(students, n);
+                modified = true;
                 break;
             case 5:
                 printGoodStudents(students, n);
                 break;
             case 6:
+                // очистим остаток ввода
+                cin.ignore(numeric_limits<streamsize>::max(), '\n');
                 searchByRecordBook(students, n);
                 break;
             case 7:
+                // очистим остаток ввода
+                cin.ignore(numeric_limits<streamsize>::max(), '\n');
                 editStudent(students, n);
+                modified = true;
                 break;
-            case 0:
-                cout << "Выход из программы...\n";
+            case 8:
+                if (saveToFile(students, n)) {
+                    cout << "Данные успешно сохранены в '" << FILENAME << "'.\n";
+                    modified = false;
+                } else {
+                    cout << "Ошибка при сохранении.\n";
+                }
                 break;
+            case 9: {
+                cout << "Внимание: загрузка перезапишет текущие несохранённые данные. Продолжить? (1=Да / 0=Нет): ";
+                int q; cin >> q;
+                if (q == 1) {
+                    if (loadFromFile(students, n)) {
+                        cout << "Загрузка завершена. Текущий список заменён. Количество студентов: " << n << '\n';
+                        modified = false;
+                    } else cout << "Ошибка: файл не найден или поврежден.\n";
+                } else cout << "Отмена загрузки.\n";
+                break;
+            }
             default:
                 cout << "Неверный выбор. Попробуйте снова.\n";
         }
-    } while (choice != 0);
+    }
+}
 
-    if (students != nullptr) {
-        delete[] students;
+int main() {
+#ifdef _WIN32
+    // Переключаем консоль на UTF-8 (Windows)
+    SetConsoleOutputCP(CP_UTF8);
+    SetConsoleCP(CP_UTF8);
+    setlocale(LC_ALL, ".UTF8");
+#else
+    setlocale(LC_ALL, "");
+#endif
+
+    STUDENT* students = nullptr;
+    int n = 0;
+    bool modified = false;
+
+    while (true) {
+        cout << "\n=== ГЛАВНОЕ МЕНЮ ===\n";
+        cout << "1. Работа с таблицей (тип 1 — students.txt)\n";
+        cout << "0. Выход\n";
+        cout << "Выберите действие: ";
+        int mainChoice;
+        if (!(cin >> mainChoice)) {
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            cout << "Неверный ввод. Попробуйте снова.\n";
+            continue;
+        }
+        if (mainChoice == 0) break;
+        if (mainChoice == 1) {
+            // при выборе 1 пытаемся загрузить файл; если нет — предлагаем создать таблицу
+            if (loadFromFile(students, n)) {
+                if (n > 0) cout << "Загружено " << n << " студента(ов) из файла '" << FILENAME << "'.\n";
+                else {
+                    cout << "Файл '" << FILENAME << "' найден, но он пуст или содержит некорректные данные.\n";
+                    cout << "Создать новую таблицу? (1=Да / 0=Нет): ";
+                    int q; cin >> q;
+                    if (q == 1) {
+                        cout << "Введите количество студентов: ";
+                        int newN; cin >> newN;
+                        if (newN > 0) {
+                            delete[] students;
+                            students = new STUDENT[newN];
+                            // consume newline
+                            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                            for (int i = 0; i < newN; ++i) {
+                                cout << "\nВвод данных для студента #" << i + 1 << ":\n";
+                                students[i].input();
+                            }
+                            n = newN;
+                            modified = true;
+                        } else cout << "Количество должно быть > 0. Возврат в главное меню.\n";
+                    }
+                }
+            } else {
+                cout << "Файл '" << FILENAME << "' не найден. Создать новую таблицу? (1=Да / 0=Нет): ";
+                int q; cin >> q;
+                if (q == 1) {
+                    cout << "Введите количество студентов: ";
+                    int newN; cin >> newN;
+                    if (newN > 0) {
+                        delete[] students;
+                        students = new STUDENT[newN];
+                        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                        for (int i = 0; i < newN; ++i) {
+                            cout << "\nВвод данных для студента #" << i + 1 << ":\n";
+                            students[i].input();
+                        }
+                        n = newN;
+                        modified = true;
+                    } else cout << "Количество должно быть > 0. Возврат в главное меню.\n";
+                }
+            }
+            submenu_table(students, n, modified);
+        } else {
+            cout << "В главном меню доступны только 1 и 0. Попробуйте снова.\n";
+        }
     }
 
+    if (modified) {
+        cout << "Произведены изменения. Сохранить перед выходом? (1=Да / 0=Нет): ";
+        int q; cin >> q;
+        if (q == 1) {
+            if (saveToFile(students, n)) cout << "Сохранено в файл.\n";
+            else cout << "Ошибка сохранения.\n";
+        }
+    }
+
+    delete[] students;
+    cout << "Программа завершена.\n";
     return 0;
 }
