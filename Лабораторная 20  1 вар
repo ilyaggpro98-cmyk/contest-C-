@@ -52,9 +52,9 @@ void printHeader() {
          << setw(W_IDX)   << "#"
          << " | " << setw(W_REC + 7)   << "Фамилия"
          << " | " << setw(W_LAST + 7)  << "Имя"
-         << " | " << setw(W_FIRST + 3) << "Отчество"
-         << " | " << setw(W_MID + 8)   << "Возраст"
-         << " | " << setw(W_GROUP + 6) << "Факультет"
+         << " | " << setw(W_FIRST + 7) << "Отчество"
+         << " | " << setw(W_MID + 7)   << "Возраст"
+         << " | " << setw(W_GROUP + 4) << "Факультет"
          << " | " << setw(W_GRADE) << "Курс/Группа/Сред."
          << '\n';
     cout << string(totalWidth(), '-') << '\n';
@@ -68,11 +68,11 @@ void printStudentRow(const Student &st, int idx) {
     cg << st.course << "/" << st.group << "/" << fixed << setprecision(2) << st.averageMark;
     string cgStr = fit(cg.str(), W_GRADE);
     cout << left << setw(W_IDX) << idx
-         << " | " << setw(W_REC + 7) << sur
-         << " | " << setw(W_LAST + 7) << name
-         << " | " << setw(W_FIRST + 3) << patro
-         << " | " << right << setw(W_MID + 8) << st.age
-         << " | " << setw(W_GROUP + 6) << st.facultyCode
+         << " | " << setw(W_REC + 1) << sur
+         << " | " << setw(W_LAST + 5) << name
+         << " | " << setw(W_FIRST) << patro
+         << " | " << right << setw(W_MID) << st.age
+         << " | " << setw(W_GROUP) << st.facultyCode
          << " | " << right << setw(W_GRADE) << cgStr
          << left << '\n';
 }
@@ -255,44 +255,74 @@ void individualTask(const string &filename, int facultyCode) {
 void submenu_table(const string &filename) {
     bool modified = false;
     while (true) {
+        size_t total = countRecords(filename); // проверяем количество записей каждый цикл
+
         cout << "\n--- МЕНЮ ТАБЛИЦЫ ---\n";
+        if (total == 0) {
+            // минимальное меню при пустом файле
+            cout << "1. Добавить запись\n";
+            cout << "0. Вернуться в главное меню\n";
+            int ch = readInt("Выберите действие: ");
+            if (ch == 0) {
+                if (modified) {
+                    cout << "Сохранить изменения? (1=Да/0=Нет): ";
+                    int q; cin >> q;
+                    string tmp; getline(cin, tmp);
+                    if (q == 1) cout << "Данные уже сохраняются немедленно в этом варианте (нет кэша).\n";
+                }
+                break;
+            } else if (ch == 1) {
+                addRecord(filename);
+                modified = true;
+            } else {
+                cout << "Неверный выбор.\n";
+            }
+            continue;
+        }
+
+        // полное меню, если есть записи
         cout << "1. Просмотреть файл (таблица)\n";
         cout << "2. Добавить запись\n";
         cout << "3. Удалить запись (по номеру)\n";
         cout << "4. Редактировать запись (по номеру)\n";
         cout << "5. Индивидуальное задание (формирование FIO.txt по коду факультета)\n";
         cout << "0. Вернуться в главное меню\n";
+
         int ch = readInt("Выберите действие: ");
         if (ch == 0) {
             if (modified) {
                 cout << "Сохранить изменения? (1=Да/0=Нет): ";
                 int q; cin >> q;
+                string tmp; getline(cin, tmp);
                 if (q == 1) cout << "Данные уже сохраняются немедленно в этом варианте (нет кэша).\n";
             }
             break;
         }
+
         switch (ch) {
             case 1: viewFile(filename); break;
             case 2: addRecord(filename); modified = true; break;
             case 3: {
-                size_t total = countRecords(filename);
-                if (total == 0) { cout << "Файл пуст.\n"; break; }
-                cout << "Всего записей: " << total << '\n';
+                size_t total_local = countRecords(filename);
+                if (total_local == 0) { cout << "Файл пуст.\n"; break; }
+                cout << "Всего записей: " << total_local << '\n';
                 int num = readInt("Номер записи для удаления (1..): ");
                 deleteRecord(filename, num);
                 modified = true;
                 break;
             }
             case 4: {
-                size_t total = countRecords(filename);
-                if (total == 0) { cout << "Файл пуст.\n"; break; }
-                cout << "Всего записей: " << total << '\n';
+                size_t total_local = countRecords(filename);
+                if (total_local == 0) { cout << "Файл пуст.\n"; break; }
+                cout << "Всего записей: " << total_local << '\n';
                 int num = readInt("Номер записи для редактирования (1..): ");
                 editRecord(filename, num);
                 modified = true;
                 break;
             }
             case 5: {
+                size_t total_local = countRecords(filename);
+                if (total_local == 0) { cout << "Файл пуст. Индивидуальное задание недоступно.\n"; break; }
                 int code = readInt("Введите код факультета: ");
                 individualTask(filename, code);
                 break;
@@ -325,6 +355,7 @@ int main() {
             if (exists) {
                 cout << "Файл существует. 1 - Открыть текущий, 2 - Пересоздать (удалить и создать новый): ";
                 int sub; cin >> sub;
+                string tmp; getline(cin, tmp);
                 if (sub == 1) {
                     submenu_table(filename);
                 } else if (sub == 2) {
@@ -336,6 +367,7 @@ int main() {
             } else {
                 cout << "Файл не найден. Создать новый? (1=Да / 0=Нет): ";
                 int q; cin >> q;
+                string tmp; getline(cin, tmp);
                 if (q == 1) {
                     createFile(filename);
                     submenu_table(filename);
