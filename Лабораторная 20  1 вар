@@ -54,7 +54,7 @@ void printHeader() {
          << " | " << setw(W_LAST + 7)  << "Имя"
          << " | " << setw(W_FIRST + 7) << "Отчество"
          << " | " << setw(W_MID + 7)   << "Возраст"
-         << " | " << setw(W_GROUP + 4) << "Факультет"
+         << " | " << setw(W_GROUP + 6) << "Факультет"
          << " | " << setw(W_GRADE) << "Курс/Группа/Сред."
          << '\n';
     cout << string(totalWidth(), '-') << '\n';
@@ -68,8 +68,8 @@ void printStudentRow(const Student &st, int idx) {
     cg << st.course << "/" << st.group << "/" << fixed << setprecision(2) << st.averageMark;
     string cgStr = fit(cg.str(), W_GRADE);
     cout << left << setw(W_IDX) << idx
-         << " | " << setw(W_REC + 1) << sur
-         << " | " << setw(W_LAST + 5) << name
+         << " | " << setw(W_REC) << sur
+         << " | " << setw(W_LAST + 4) << name
          << " | " << setw(W_FIRST) << patro
          << " | " << right << setw(W_MID) << st.age
          << " | " << setw(W_GROUP) << st.facultyCode
